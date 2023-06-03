@@ -13,7 +13,7 @@ java Server.java
 その後
 ```
 javac Client.java
-java Clinet.java
+java Cliet.java
 ```
 を実行する
 
