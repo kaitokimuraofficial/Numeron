@@ -3,27 +3,23 @@
 public class Game {
 
     private static int SIZE;
-
     private static int TURN;
 
-    public Game(int SIZE) {
+
+    public Game(int size) {
         TURN = 1;
-        SIZE = this.SIZE;
+        SIZE = size;
     }
 
     public int getTurn() {
         return TURN;
     }
-
-    private void changeTurn() {
-        TURN ^= 1;
-    }
     
 
-    public int[] calculateAll(int[] number1, int[] number2) {
-        int answer[] = new int[2];
-        answer[0] = calculateEat(number1, number2);
-        answer[1] = calculateBite(number1, number2);
+    public String calculateAll(int[] number1, int[] number2) {
+        String answer = "";
+        answer += Integer.toString(calculateEat(number1, number2));
+        answer += Integer.toString(calculateBite(number1, number2));
         
         return answer;
     }

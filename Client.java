@@ -1,7 +1,4 @@
 import java.net.*;
-
-import javax.print.attribute.standard.Sides;
-
 import java.io.*;
 
 
@@ -14,7 +11,10 @@ public class Client {
     String receiveAnswer1;
     String receiveAnswer2;
 
-    int Turn;
+    String Turn;
+    String wait;
+    String expectNumber;
+    String result;
 
     private Socket socket;
     private InputStreamReader inputStreamReader;
@@ -82,14 +82,39 @@ public class Client {
     
     public void waitGo() {
         try {
-            Turn = Integer.parseInt(bufferedReader.readLine());
+            Turn = bufferedReader.readLine();
             frame.changeIntoMainPanel(Turn);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         while (true) {
-            if (Turn == 1) {
-                receiveAnswer1 = frame.
+            try {
+                if (Turn == "GO") {
+                    wait = frame.getWait();
+                    while (wait == null) {
+                        wait = frame.getWait();
+                    }
+                    //Send the number that client expects to the Server
+                    expectNumber = frame.getExpectNumber();
+                    System.out.println("SEND IT");
+                    bufferedWriter.write(expectNumber);
+                    bufferedWriter.newLine();
+                    bufferedWriter.flush();
+
+                    String temp = bufferedReader.readLine();
+                    frame.update(temp);
+                    Turn = "WAIT";
+                }
+                else {
+                    result = bufferedReader.readLine();
+                    String temp = bufferedReader.readLine();
+                    frame.update2(temp);
+                    Turn = "GO";
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

@@ -25,11 +25,14 @@ public class Frame extends JFrame implements ActionListener{
 
     JLabel jl;
 
+    String frameexpectNumber;
+    String wait;
 
     public Frame() {
 
         contentPane = getContentPane();
         sp = new StartPanel();
+        mp = new MainPanel();
         ruleButton = sp.getRuleButton();
         startButton = sp.getStartButton();
         inputButton = mp.getInputButton();
@@ -72,11 +75,6 @@ public class Frame extends JFrame implements ActionListener{
         changeIntoLoadPanel();
     }
 
-    // public void changeIntoStartPanel() {
-    //     jl.setText("START");
-    //     panel2.remove(1);
-    //     panel2.add(sp, BorderLayout.CENTER);
-    // }
 
     public void changeIntoLoadPanel() {
         jl.setText("LOAD");
@@ -94,13 +92,14 @@ public class Frame extends JFrame implements ActionListener{
         return number;
     }
 
-    public void changeIntoMainPanel(int Turn) {
-        jl.setText("MAIN");
-        if (Turn == 1) {
+    public void changeIntoMainPanel(String Turn) {
+        if (Turn.equals("GO")) {
             buttonEnabled = true;
+            jl.setText("YOUR TURN");
         }
         else {
             buttonEnabled = false;
+            jl.setText("WAIT");
         }
         panel2.remove(lp);
         panel2.add(mp, BorderLayout.CENTER);
@@ -117,14 +116,62 @@ public class Frame extends JFrame implements ActionListener{
     public void executeInputButton() {
         if (buttonEnabled == false) {
             return;
+        } else {
+            frameexpectNumber = mp.getExpectNumber();
+            wait = "OK";
+
         }
-        else {
-            
+        wait = null;
+    }
+    
+    public void update(String judgeResult) {
+        int bite;
+        int eat;
+        int temp;
+        int length;
+        try {
+            temp = Integer.parseInt(judgeResult);
+            bite = temp / 10;
+            eat = temp % 10;
+            length = bite + eat;
+            mp.jta.setText("BITE: " + Integer.toString(bite) + " EAT: " + Integer.toString(eat) + "\n");
+            if (length == bite) {
+                changeIntoEndPanel();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void update2(String judgeResult) {
+        int bite;
+        int eat;
+        int temp;
+        int length;
+        try {
+            temp = Integer.parseInt(judgeResult); 
+            bite = temp/10;
+            eat = temp % 10;
+            length = bite + eat;
+  
+            if (length == bite) {
+                changeIntoEndPanel();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public Boolean getButtonEnabled() {
         return buttonEnabled;
+    }
+
+    public String getWait() {
+        return wait;
+    }
+
+    public String getExpectNumber() {
+        return frameexpectNumber;
     }
     
     public void setButtonEnabled(Boolean buttonEnabled) {

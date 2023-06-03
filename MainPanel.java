@@ -14,6 +14,7 @@ public class MainPanel extends JPanel{
     JTextField expectNumber;
     JButton inputButton;
 
+    JLabel jb;
 
 
     public MainPanel() {
@@ -37,13 +38,15 @@ public class MainPanel extends JPanel{
         jta.setLineWrap(true);
         jta.setText("");
 
+        jb = new JLabel("");
+
         memoPart.add(jta);
+
 
         expectNumber = new JTextField();
         expectNumber.setPreferredSize(new Dimension(100, 20));
 
         inputButton = new JButton("JUDGE");
-
 
         inputPart.add(expectNumber);
         inputPart.add(inputButton);
@@ -52,8 +55,10 @@ public class MainPanel extends JPanel{
         add(inputPart, BorderLayout.CENTER);
         add(resultPart, BorderLayout.SOUTH);
     }
-
-
+    
+    public String getExpectNumber() {
+        return expectNumber.getText();
+    }
 
     public JButton getInputButton() {
         return inputButton;

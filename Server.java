@@ -14,6 +14,15 @@ public class Server {
     String tempNumber1;
     String tempNumber2;
 
+    String expectNumber1To2;
+    String expectNumber2To1;
+
+    int[] expectNumber1;
+    int[] expectNumber2;
+
+    String judgeResult1To2;
+    String judgeResult2To1;
+
 
     private static ServerSocket serverSocket;
     private static Socket socket1;
@@ -57,10 +66,12 @@ public class Server {
             System.out.println("SIZE is " + SIZE);
             number1 = new int[SIZE];
             number2 = new int[SIZE];
+            expectNumber1 = new int[SIZE];
+            expectNumber2 = new int[SIZE];
+
             game = new Game(SIZE);
             //In this method, Server receices both number1 and number2
             connect();
-            System.out.println("EndPoint of decideSize");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -69,7 +80,6 @@ public class Server {
     public void connect() {
         System.out.println("START OF CONNECT");
         connectFirstSocket();
-        System.out.println("END OF CONNECT");
     }
     
     public void connectFirstSocket() {
@@ -133,7 +143,7 @@ public class Server {
         }
         try {
             tempNumber2 = bufferedReader2.readLine();
-            System.out.println("Player1 decided its Number: " + tempNumber2);
+            System.out.println("Player2 decided its Number: " + tempNumber2);
             for (int i = 0; i < tempNumber2.length(); i++) {
                 number2[i] = Character.getNumericValue(tempNumber2.charAt(i));
             }
@@ -145,22 +155,46 @@ public class Server {
     
     public void getStart() {
         try {
-            bufferedWriter1.write("GO");
-            bufferedWriter1.newLine();
-            bufferedWriter1.flush();
-            bufferedWriter2.write("WAIT");
-            bufferedWriter2.newLine();
-            bufferedWriter2.flush();
-            judge();
+            sendToBothSocket("GO", "WAIT");
+            //expectNumber1To2 is the same as expectNumber in Client1
+            expectNumber1To2 = bufferedReader1.readLine();
+            System.out.println("Now, I got expectNumber1To2");
+            for (int i = 0; i < SIZE; i++) {
+                expectNumber1[i] = Character.getNumericValue(expectNumber1To2.charAt(i));
+            }
+            judgeResult1To2 = game.calculateAll(expectNumber1, number2);
+
+            sendToBothSocket(judgeResult1To2, judgeResult1To2);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            sendToBothSocket("WAIT", "GO");
+            expectNumber2To1 = bufferedReader2.readLine();
+            for (int i = 0; i < SIZE; i++) {
+                expectNumber2[i] = Character.getNumericValue(expectNumber2To1.charAt(i));
+            }
+            judgeResult2To1 = game.calculateAll(expectNumber2, number1);
+
+            sendToBothSocket(judgeResult2To1, judgeResult2To1);      
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    public void judge() {
-        
-    }
     
+    public void sendToBothSocket(String str1, String str2) {
+        try {
+            bufferedWriter1.write(str1);
+            bufferedWriter1.newLine();
+            bufferedWriter1.flush();
+            bufferedWriter2.write(str2);
+            bufferedWriter2.newLine();
+            bufferedWriter2.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     
     public static void main(String[] args) {
         Server server = new Server();
