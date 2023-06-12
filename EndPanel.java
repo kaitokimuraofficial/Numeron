@@ -1,21 +1,35 @@
 import javax.swing.*;
 import java.awt.*;
 
-
 public class EndPanel extends JPanel {
-    JPanel endPart;
-
-    JLabel jl;
+    private JLabel endLabel;
+    private JButton endButton;
 
     public EndPanel() {
         setLayout(new BorderLayout());
         setSize(500, 350);
-        jl = new JLabel("END");
-        endPart = new JPanel();
 
-        endPart.setPreferredSize(new Dimension(500, 100));
+        endLabel = new JLabel("You ");
+        endButton = new JButton("Close Window");
 
-        endPart.add(jl);
-        add(endPart, BorderLayout.CENTER);
+        add(endLabel);
+        add(endButton);
+    }
+
+    /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
+
+
+    /* -------------getメソッド------------- */
+    public JLabel getEndLabel() {
+        return endLabel;
+    }
+
+    public JButton getEndButton() {
+        return endButton;
+    }
+
+    /* -------------setメソッド------------- */
+    public void setEndLabel(String str) {
+        endLabel.setText(str);
     }
 }

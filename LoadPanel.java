@@ -1,32 +1,31 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-
-public class LoadPanel extends JPanel implements ActionListener{
-    JPanel loadPart;
-    JLabel jl;
+public class LoadPanel extends JPanel {
+    private JLabel loadLabel;
 
     public LoadPanel() {
         setLayout(new BorderLayout());
         setSize(500, 350);
-        
-        loadPart = new JPanel();
-        loadPart.setBackground(Color.BLUE);
-        loadPart.setLayout(new BorderLayout());
-        
-        jl = new JLabel("NOW LOADING....");
-        jl.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 24));
-        
-        loadPart.add(jl, BorderLayout.CENTER);
-        add(loadPart);
 
-    }
+        setBackground(Color.BLUE);
+        setLayout(new BorderLayout());
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        
+        loadLabel = new JLabel("NOW LOADING....");
+        loadLabel.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 24));
+
+        add(loadLabel, BorderLayout.CENTER);
     }
     
+    /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
+
+    /* -------------getメソッド------------- */
+    public JLabel getLoadLabel() {
+        return loadLabel;
+    }
+
+    /* -------------setメソッド------------- */
+    public void setLoadLabel(String str) {
+        loadLabel.setText(str);
+    }
 }

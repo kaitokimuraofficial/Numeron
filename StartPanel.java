@@ -1,18 +1,19 @@
 import javax.swing.*;
 import java.awt.*;
-
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-
 public class StartPanel extends JPanel {
-    JPanel titlePart;
-    JPanel rulePart;
-    JPanel startPart;
+    private JPanel titlePart;
+    private JPanel rulePart;
+    private JPanel startPart;
 
-    public static JButton ruleButton;
-    public static JButton startButton;
-    public JTextField inputNumber;
+    private RulePanel rp;
+
+    private JButton ruleButton;
+    private JButton inputMyNumberButton;
+
+    private JTextField myNumber;
 
 
     public StartPanel() {
@@ -29,14 +30,14 @@ public class StartPanel extends JPanel {
         rulePart.setBackground(Color.YELLOW);
 
         ruleButton = new JButton("RULE");
-        startButton = new JButton("GAME START");
+        inputMyNumberButton = new JButton("GAME START");
 
-        inputNumber = new JTextField();
-        inputNumber.setPreferredSize(new Dimension(100, 20));
+        myNumber = new JTextField();
+        myNumber.setPreferredSize(new Dimension(100, 20));
 
         rulePart.add(ruleButton);
-        startPart.add(inputNumber);
-        startPart.add(startButton);
+        startPart.add(myNumber);
+        startPart.add(inputMyNumberButton);
         add(titlePart, BorderLayout.NORTH);
         add(rulePart, BorderLayout.CENTER);
         add(startPart, BorderLayout.SOUTH);
@@ -44,24 +45,32 @@ public class StartPanel extends JPanel {
         setBackground(Color.RED);
     }
 
-    public JButton getRuleButton() {
-        return ruleButton;
-    }
-
-    public JButton getStartButton() {
-        return startButton;
-    }
-
-    public String getJTextField() {
-        return inputNumber.getText();
-    }
-
     public void executeRulePanel() {
-        RulePanel rp = new RulePanel();
+        rp = new RulePanel();
         rp.setVisible(true);
         requestFocusInWindow();
     }
 
+    /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
+
+
+    /* -------------getメソッド------------- */
+    public JButton getRuleButton() {
+        return ruleButton;
+    }
+
+    public JButton getinputMyNumberButton() {
+        return inputMyNumberButton;
+    }
+
+    public JTextField getMyNumber() {
+        return myNumber;
+    }
+
+    /* -------------setメソッド------------- */
+    public void setMyNumber(String str) {
+        myNumber.setText(str);
+    }
 }
 
 class RulePanel extends JDialog {

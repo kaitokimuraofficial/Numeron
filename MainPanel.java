@@ -1,21 +1,20 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 
 public class MainPanel extends JPanel{
-    JPanel memoPart;
-    JPanel inputPart;
-    JPanel resultPart;
+    private JPanel memoPart;
+    private JPanel inputPart;
+    private JPanel resultPart;
+    
+    private JButton decideExpectNumberButton;
 
-    Font f;
-    JTextArea jta;
-    JTextField expectNumber;
-    JButton inputButton;
+    private JLabel mainLabel;
 
-    JLabel jb;
+    private JTextField expectedNumber;
 
+    private Font f;
+    private JTextArea resultArea;
+    
 
     public MainPanel() {
         setLayout(new BorderLayout());
@@ -32,35 +31,57 @@ public class MainPanel extends JPanel{
         inputPart.setBackground(Color.YELLOW);
         resultPart.setBackground(Color.green);
 
-        jta = new JTextArea(5, 50);
-        jta.setFont(f);
-        jta.setEditable(false);
-        jta.setLineWrap(true);
-        jta.setText("");
+        resultArea = new JTextArea(5, 50);
+        resultArea.setFont(f);
+        resultArea.setEditable(false);
+        resultArea.setLineWrap(true);
+        resultArea.setText("");
 
-        jb = new JLabel("");
+        mainLabel = new JLabel("");
 
-        memoPart.add(jta);
+        memoPart.add(resultArea);
 
+        expectedNumber = new JTextField();
+        expectedNumber.setPreferredSize(new Dimension(100, 20));
 
-        expectNumber = new JTextField();
-        expectNumber.setPreferredSize(new Dimension(100, 20));
+        decideExpectNumberButton = new JButton("JUDGE");
 
-        inputButton = new JButton("JUDGE");
-
-        inputPart.add(expectNumber);
-        inputPart.add(inputButton);
+        inputPart.add(expectedNumber);
+        inputPart.add(decideExpectNumberButton);
 
         add(memoPart, BorderLayout.NORTH);
         add(inputPart, BorderLayout.CENTER);
         add(resultPart, BorderLayout.SOUTH);
     }
-    
-    public String getExpectNumber() {
-        return expectNumber.getText();
+
+
+    /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
+
+
+    /* -------------getメソッド------------- */
+    public JButton getdecideExpectNumberButton() {
+        return decideExpectNumberButton;
     }
 
-    public JButton getInputButton() {
-        return inputButton;
+    public JLabel getMainLabel() {
+        return mainLabel;
     }
+    
+    public JTextField getExpectedNumber() {
+        return expectedNumber;
+    }
+
+    public JTextArea getResultArea() {
+        return resultArea;
+    }
+
+    /* -------------setメソッド------------- */
+    public void setMainLabel(String str) {
+        mainLabel.setText(str);
+    }
+    
+    public void setResultArea(String str) {
+        resultArea.setText(str);
+    }
+    
 }
