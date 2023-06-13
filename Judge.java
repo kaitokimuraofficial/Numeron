@@ -9,8 +9,11 @@ public class Judge {
     private int[] number1;
     private int[] number2;
 
-    int bite;
-    int eat;
+    private String biteInAnswer;
+    private String eatInAnswer;
+
+    char[] result1;
+    char[] result2;
     
 
     /* 自分自身を持っているServerクラスのserverを
@@ -22,6 +25,8 @@ public class Judge {
         this.SIZE = SIZE;
         number1 = new int[SIZE];
         number2 = new int[SIZE];
+        result1 = new char[SIZE];
+        result2 = new char[SIZE];
     }
 
     /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
@@ -30,28 +35,35 @@ public class Judge {
 
     /* ^^^^^^^^^^^^判定に使うメソッドまとめ^^^^^^^^^^^^ */
     /* -------------相手の数として予想したものとtargetClientを入力して判定してもらう------------ */
-    public void startJudge(int[] inputNumber, int targetClientNumber) {
+    public String[] startJudge(String inputNumber, int targetClientNumber) {
         if (targetClientNumber == 1) {
-            calculateAll(inputNumber, number1);
+            return calculateAll(inputNumber, number1);
         }
         else {
-            calculateAll(inputNumber, number2);
+            return calculateAll(inputNumber, number2);
         }
     }
 
     /* -------------EatとBiteの数を調べてまとめて返す------------ */
-    public void calculateAll(int[] inputNumber, int[] targetNumber) {
+    public String[] calculateAll(String inputNumber, int[] targetNumber) {
         
-        eat = calculateEat(inputNumber, targetNumber);
-        bite = calculateBite(inputNumber, targetNumber);
+        eatInAnswer = Integer.toString(calculateEat(inputNumber, targetNumber));
+        biteInAnswer = Integer.toString(calculateBite(inputNumber, targetNumber));
 
-        server.setEat(eat);
-        server.setBite(bite);
+        return new String[] {eatInAnswer, biteInAnswer};
+
     }
 
     /* -------------Eatの数を調べる------------- */
-    public int calculateEat(int[] expectedNumber, int[] correctNumber) {
-        eat = 0;
+    public int calculateEat(String inputNumber, int[] correctNumber) {
+        int eat = 0;
+        int[] expectedNumber = new int[SIZE];
+
+        for (int i = 0; i < SIZE; i++) {
+            char digitChar = inputNumber.charAt(i);
+            int digit = Character.getNumericValue(digitChar);
+            expectedNumber[i] = digit;
+        }
 
         for (int i = 0; i < SIZE; i++) {
             if (expectedNumber[i] == correctNumber[i]) {
@@ -63,8 +75,16 @@ public class Judge {
     }
     
     /* -------------Biteの数を調べる------------- */
-    public int calculateBite(int[] expectedNumber, int[] correctNumber) {
-        bite = 0;
+    public int calculateBite(String inputNumber, int[] correctNumber) {
+        int bite = 0;
+        
+        int[] expectedNumber = new int[SIZE];
+
+        for (int i = 0; i < SIZE; i++) {
+            char digitChar = inputNumber.charAt(i);
+            int digit = Character.getNumericValue(digitChar);
+            expectedNumber[i] = digit;
+        }
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = i; i < SIZE; j++) {

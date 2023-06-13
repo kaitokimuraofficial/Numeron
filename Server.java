@@ -6,7 +6,7 @@ import java.util.Scanner;
  * Clientクラスからソケット経由で送られてきた予想結果をJudgeクラスにて
  * 判定してその結果とそれに付随する次の動作の命令をClientクラスに戻す
  */
-public class Server {
+public class Server extends Thread {
 
     private static String HOST = "127.0.0.1";
     private static int PORT = 1234;
@@ -27,18 +27,22 @@ public class Server {
     private static BufferedWriter bufferedWriter2;
 
     private Judge judge;
-    private Server server;
+
+    private Thread thread1;
+    private Thread thread2;
 
     private String tempNumber1;
     private String tempNumber2;
 
-    String judgeResult1To2;
-    String judgeResult2To1;
+    private String expectedNumber1;
+    private String expectedNumber2;
 
-    private String bite;
-    private String eat;
+    private String[] judgeResult1; /* Client1がClient2の数字を予想した判定結果 */
+    private String[] judgeResult2; /* Client2がClient1の数字を予想した判定結果 */
 
-    String que;
+
+    private String que1;
+    private String que2;
 
     Scanner scanner = new Scanner(System.in);
 
@@ -62,7 +66,7 @@ public class Server {
     /* プロンプト上で入力された数字を桁数(SIZE)として設定する
      * judgeを宣言する。judgeのコンストラクタではnubmer1,2の初期化が行われる
      */
-    public void decideSize() {
+    private void decideSize() {
         System.out.print("Enter the Number: ");
 
         try {
@@ -72,16 +76,82 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        print("1");
 
-        connectFirstSocket();
+        createThreadAndConnectSocket();
+        print("2");
     }
 
+    public void createThreadAndConnectSocket() {
+        thread1 = createSocketThread("1");
+        thread2 = createSocketThread("2");
+        print("3");
+
+        thread1.start();
+        thread2.start();
+        print("4");
+    }
+
+
+
+    /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
+    private Thread createSocketThread(String threadName) {
+        return new Thread(() -> {
+            if (threadName.equals("1")) {
+                connectFirstSocket();
+                decideFirstNumber();
+                waitForReplyFromFirstSocket();
+
+                
+                while (true) {
+                    try {
+                        expectedNumber1 = bufferedReader1.readLine();
+                        judgeResult1 = judge.startJudge(expectedNumber1, 2);
+                        if (judgeResult1[0] == Integer.toString(SIZE)) {
+                            sendToBothSocket("WIN", "LOSE");
+                            System.out.println(SIZE);
+                            break;
+                        } else {
+                            bufferedWriter1.write(judgeResult1[0] + judgeResult1[1]);
+                            bufferedWriter1.newLine();
+                            bufferedWriter1.flush();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else if (threadName.equals("2")) {
+                connectSecondSocket();
+                decideSecondNumber();
+                waitForReplyFromSecondSocket();
+
+                while (true) {
+                    try {
+                        expectedNumber2 = bufferedReader2.readLine();
+                        judgeResult2 = judge.startJudge(expectedNumber2, 1);
+                        if (judgeResult2[0] == Integer.toString(SIZE)) {
+                            sendToBothSocket("LOSE", "WIN");
+                            break;
+                        } else {
+                            bufferedWriter2.write(judgeResult2[0] + judgeResult2[1]);
+                            bufferedWriter2.newLine();
+                            bufferedWriter2.flush();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+    
+    /* -------------ソケットの初期化メソッド------------- */
     /* 1つ目のソケットをconnectする
      * ソケット通信にて必要なものを初期化する
      * ソケットがつながったあとdecideFirstNumber()によって1つ目の
      * Clientが相手に予想させる数字を決める
      */
-    public void connectFirstSocket() {
+    private void connectFirstSocket() {
         try {
             socket1 = serverSocket.accept();
             System.out.println("Connected 1st Socket!");
@@ -93,15 +163,13 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        decideFirstNumber();
     }
 
     /* まず最初にSIZEをClient1に送信する
     * Client1はもらったSIZE桁の数字を決めたあと
     * Serverに送信し返すのでそれをnumber1[]に格納する
     */
-    public void decideFirstNumber() {
+    private void decideFirstNumber() {
         try {
             bufferedWriter1.write(String.valueOf(SIZE));
             bufferedWriter1.newLine();
@@ -121,16 +189,22 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        waitForReplyFromFirstSocket();
     }
 
-    public void waitForReplyFromFirstSocket() {
+    private void waitForReplyFromFirstSocket() {
         try {
-            que = bufferedReader1.readLine();
+            que1 = bufferedReader1.readLine();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        connectSecondSocket();
+
+        try {
+            bufferedWriter1.write("START");
+            bufferedWriter1.newLine();
+            bufferedWriter1.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
   
     /* 2つ目のソケットをconnectする
@@ -138,7 +212,7 @@ public class Server {
      * ソケットがつながったあとdecideSecondNumber()によって2つ目の
      * Clientが相手に予想させる数字を決める
      */
-    public void connectSecondSocket() {
+    private void connectSecondSocket() {
         try {
             socket2 = serverSocket.accept();
             System.out.println("Connected 2nd Socket!");
@@ -150,16 +224,13 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        decideSecondNumber();
     }
 
     /* まず最初にSIZEをClient2に送信する
     * Client2はもらったSIZE桁の数字を決めたあと
     * Serverに送信し返すのでそれをnumber2[]に格納する
-    * 
-    * gameStart()にてゲームをスタートする
     */
-    public void decideSecondNumber() {
+    private void decideSecondNumber() {
         try {
             bufferedWriter2.write(String.valueOf(SIZE));
             bufferedWriter2.newLine();
@@ -177,27 +248,27 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        waitForReplyFromFirstSocket();
     }
     
-    public void waitForReplyFromSecondSocket() {
+    private void waitForReplyFromSecondSocket() {
         try {
-            que = bufferedReader2.readLine();
+            que2 = bufferedReader2.readLine();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        gameStart();
-    }
-    
-    public void gameStart() {
+        try {
+            bufferedWriter2.write("START");
+            bufferedWriter2.newLine();
+            bufferedWriter2.flush();
+        } catch (Exception e) {
+            e.printStackTrace();;
+        }
         
     }
     
 
-    /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
-
     /* -------------両方のソケットに送信するメソッド------------- */
-    public void sendToBothSocket(String str1, String str2) {
+    private void sendToBothSocket(String str1, String str2) {
         try {
             bufferedWriter1.write(str1);
             bufferedWriter1.newLine();
@@ -210,14 +281,13 @@ public class Server {
         }
     }
 
-    /* -------------setメソッド------------- */
+    /* -------------getメソッド------------- */
     
-    public void setEat(int eat) {
-        this.eat = Integer.toString(eat);
-    }
+    /* -------------setメソッド------------- */
 
-    public void setBite(int bite) {
-        this.bite = Integer.toString(bite);
+    /* -------------Debug用メソッド------------- */
+    private void print(String str) {
+        System.out.println(str);
     }
 
     /* -------------mainメソッド------------- */

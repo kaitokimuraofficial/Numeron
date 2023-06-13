@@ -1,9 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class Frame extends JFrame implements ActionListener {
+public class Frame extends JFrame {
     private Client client;
 
     private Container contentPane;
@@ -12,29 +10,29 @@ public class Frame extends JFrame implements ActionListener {
     private MainPanel mp;
     private EndPanel ep;
 
-    private JButton ruleButton; /* StartPanelでヌメロンのルールを表示するボタン */
-    private JButton inputMyNumberButton; /* StartPanelで自分の数字を入力してServerに数字を送るボタン */
-    private JButton decideExpectNumberButton; /* MainPanelで予想した相手の数字をServerに送信して判定してもらうためのボタン */
-    private JButton endButton; /* EndPanelでclickされるとWindowが閉じる */
+    public JButton ruleButton;                  /* StartPanelでヌメロンのルールを表示するボタン */
+    public JButton inputMyNumberButton;         /* StartPanelで自分の数字を入力してServerに数字を送るボタン */
+    public JButton decideExpectNumberButton;    /* MainPanelで予想した相手の数字をServerに送信して判定してもらうためのボタン */
+    public JButton endButton;                   /* EndPanelでclickされるとWindowが閉じる */
 
-    private JLabel loadLabel; /* LoadPanelでLoading...を表示するJLabel */
-    private JLabel mainLabel; /* MainPanelで結果を表示するJLabel */
-    private JLabel endLabel; /* EndPanelのYou Win/Loseを表示するJLabel */
+    private JLabel loadLabel;                   /* LoadPanelでLoading...を表示するJLabel */
+    private JLabel mainLabel;                   /* MainPanelで結果を表示するJLabel */
+    private JLabel endLabel;                    /* EndPanelのYou Win/Loseを表示するJLabel */
 
-    private JTextField myNumberField; /* StartPanelで自分の数字を入力するJTextField */
-    private JTextField expectedNumberField; /* MainPanelで相手の数字だと予想した数字を入力するJTField */
+    private JTextField myNumberField;           /* StartPanelで自分の数字を入力するJTextField */
+    private JTextField expectedNumberField;     /* MainPanelで相手の数字だと予想した数字を入力するJTField */
 
-    private String myNumber; /* StartPanelで自分の数字を入力するJTextFieldの中のString */
-    private String expectedNumber; /* MainPanelで相手の数字だと予想した数字を入力するJTFieldの中のString */
+    private String myNumber;                    /* StartPanelで自分の数字を入力するJTextFieldの中のString */
+    private String expectedNumber;              /* MainPanelで相手の数字だと予想した数字を入力するJTFieldの中のString */
 
-    private JTextArea resultArea; /* MainPanelでEatやBiteの結果をまとめるJTextArea */
+    private JTextArea resultArea;               /* MainPanelでEatやBiteの結果をまとめるJTextArea */
 
-    private Boolean buttonEnabled; /* Buttonが機能するかどうかのBoolean */
+    private Boolean buttonEnabled;              /* Buttonが機能するかどうかのBoolean */
 
-    private JPanel panel1;
-    private JPanel panel2;
+    private JPanel panel1;                      /* 今表示されているpanel2が何なのかを表示する */
+    private JPanel panel2;                      /* このJPanelで入力操作が行われたりメモが表示される */               
 
-    private JLabel jl;
+    private JLabel jl;                          /* 今表示されているpanel2が何かを表すJLabel */
 
 
     public Frame(Client client) {
@@ -73,12 +71,6 @@ public class Frame extends JFrame implements ActionListener {
         decideExpectNumberButton = mp.getdecideExpectNumberButton();
         endButton = ep.getEndButton();
 
-        ruleButton.addActionListener(this);
-        inputMyNumberButton.addActionListener(this);
-        decideExpectNumberButton.addActionListener(this);
-        endButton.addActionListener(this);
-
-
         loadLabel = lp.getLoadLabel();
         mainLabel = mp.getMainLabel();
         endLabel = ep.getEndLabel();
@@ -112,52 +104,16 @@ public class Frame extends JFrame implements ActionListener {
         contentPane.add(panel2);
     }
 
-    public void changeIntoEndPanel() {
+    public void changeIntoEndPanel(String Result) {
         jl.setText("END");
         contentPane.remove(panel2);
+        endLabel.setText("YOU" + Result);
         panel2.remove(mp);
         panel2.add(ep);
         contentPane.add(panel2);
     }
     
     /* -------------メソッド------------- */
-    public void update(String judgeResult) {
-        int bite;
-        int eat;
-        int temp;
-        int length;
-        try {
-            temp = Integer.parseInt(judgeResult);
-            bite = temp / 10;
-            eat = temp % 10;
-            length = bite + eat;
-            mp.jta.setText("BITE: " + Integer.toString(bite) + " EAT: " + Integer.toString(eat) + "\n");
-            if (length == bite) {
-                changeIntoEndPanel();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public void update2(String judgeResult) {
-        int bite;
-        int eat;
-        int temp;
-        int length;
-        try {
-            temp = Integer.parseInt(judgeResult);
-            bite = temp / 10;
-            eat = temp % 10;
-            length = bite + eat;
-
-            if (length == bite) {
-                changeIntoEndPanel();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
     
     public void sendExpectNumberToServer() {
         client.sendSthToServer(expectedNumber);
@@ -172,15 +128,27 @@ public class Frame extends JFrame implements ActionListener {
         changeIntoLoadPanel();
     }
 
-    public void executedecideExpectNumberButton() {
-        sendExpectNumberToServer();
-    }
-
     public void executeEndButton() {
         dispose();
     }
 
     /* -------------getメソッド------------- */
+    public JPanel getStartPanel() {
+        return sp;
+    }
+    
+    public JPanel getLoadPanel() {
+        return lp;
+    }
+    
+    public JPanel getMainPanel() {
+        return mp;
+    }
+    
+    public JPanel getEndPanel() {
+        return ep;
+    } 
+
     public JButton getRuleButton() {
         return ruleButton;
     }
@@ -201,7 +169,11 @@ public class Frame extends JFrame implements ActionListener {
         return loadLabel;
     }
     
-    public JLabel getEndPanel() {
+    public JLabel getMainLabel() {
+        return mainLabel;
+    }
+
+    public JLabel getEndLabel() {
         return endLabel;
     }
 
@@ -229,7 +201,6 @@ public class Frame extends JFrame implements ActionListener {
         return buttonEnabled;
     }
 
-    
     /* -------------setメソッド------------- */
     public void setMyNumberField(String str) {
         myNumberField.setText(str);;
@@ -239,25 +210,15 @@ public class Frame extends JFrame implements ActionListener {
         expectedNumberField.setText(str);
     }
 
-    
-    public void setButtonEnabled(Boolean bool) {
-        this.buttonEnabled = bool;
+    public void setResultArea(String str) {
+        this.resultArea.setText(str);
     }
 
-    /* -------------actionEventに関するメソッド------------- */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == ruleButton) {
-            executeRuleButton();
-        }
-        else if (e.getSource() == inputMyNumberButton) {
-            executeInputMyNumberButton();
-        }
-        else if (e.getSource() == decideExpectNumberButton) {
-            executedecideExpectNumberButton();
-        }
-        else if (e.getSource() == endButton) {
-            executeEndButton();
-        }
+    public void appendToResutlArea(String str) {
+        resultArea.append(str);
+    }
+
+    public void setButtonEnabled(Boolean bool) {
+        this.buttonEnabled = bool;
     }
 }

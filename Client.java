@@ -1,7 +1,10 @@
 import java.net.*;
 import java.io.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.concurrent.CountDownLatch;
 
-public class Client {
+public class Client implements ActionListener {
     private static String HOST = "127.0.0.1";
     private static int PORT = 1234;
     private static int SIZE;
@@ -12,15 +15,16 @@ public class Client {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
 
-    private String inputNumber;
-    String receiveAnswer1;
+    private CountDownLatch latch;
 
-    String Turn;
-    String wait;
-    String expectNumber;
-    String result;
+    private Frame frame;
 
-    Frame frame;
+    private String inputMyNumber;
+    
+    private Boolean endCondition;
+    private String expectNumber;
+    private String judgeResult;
+
     
     /* Serverとソケット通信をつなぐ
      * つないだあとFrameクラスのframeを初期化
@@ -37,6 +41,7 @@ public class Client {
             e.printStackTrace();
         }
         frame = new Frame(this);
+        addSthToActionListener();
         receiveSize();
     }
     
@@ -50,14 +55,20 @@ public class Client {
     }
 
     /* 自分の数字を決める 
-     * inputNumberはframeのStartPanelから入力された数字である。
-     * inputNumberから数字を得たあとはソケット通信でそれを送る
+     * inputMyNumberはframeのStartPanelから入力された数字である。
+     * inputMyNumberから数字を得たあとはソケット通信でそれを送る
      * sendQueToServerでこのclientが準備完了したことを伝える
     */
     public void decideAndSendMyNumber() {
-        inputNumber = frame.getMyNumber();
         try {
-            sendSthToServer(inputNumber);
+            latch.await();
+            inputMyNumber = frame.getMyNumber(); 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            sendSthToServer(inputMyNumber);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,11 +81,21 @@ public class Client {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        try {
+            bufferedReader.readLine();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         gameStart();
     }
 
     public void gameStart() {
+        frame.changeIntoMainPanel(HOST);
+        endCondition = false;
+        while (!endCondition) {
 
+        }
     }
     
     
@@ -83,15 +104,57 @@ public class Client {
         try {
             bufferedWriter.write(str);
             bufferedWriter.newLine();
-            bufferedWriter.flush();    
+            bufferedWriter.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+    
+    public void addSthToActionListener() {
+        frame.ruleButton.addActionListener(this);
+        frame.inputMyNumberButton.addActionListener(this);
+        frame.decideExpectNumberButton.addActionListener(this);
+        frame.endButton.addActionListener(this);
 
+        latch = new CountDownLatch(1);
+    }
+
+    /* -------------Debug用メソッド------------- */
+        private void print(String str) {
+        System.out.println(str);
+    }
 
     /* -------------mainメソッド------------- */
     public static void main(String[] args) {
         Client client = new Client();
+    }
+
+    /* -------------actionEventに関するメソッド------------- */
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == frame.ruleButton) {
+            frame.executeRuleButton();
+        }
+        else if (e.getSource() == frame.inputMyNumberButton) {
+            latch.countDown();
+            frame.executeInputMyNumberButton();
+        }
+        else if (e.getSource() == frame.decideExpectNumberButton) {
+            expectNumber = frame.getExpectedNumber();
+            sendSthToServer(expectNumber);
+            try {
+                judgeResult = bufferedReader.readLine();
+                if (judgeResult.equals("WIN") || judgeResult.equals("LOSE")) {
+                    frame.changeIntoEndPanel(judgeResult);
+                } else {
+                        frame.appendToResutlArea("EAT : " + judgeResult.charAt(0) + "  BITE : " + judgeResult.charAt(1) + "\n");
+                }
+            } catch (Exception exp) {
+                exp.printStackTrace();
+            }
+        }
+        else if (e.getSource() == frame.endButton) {
+            frame.executeEndButton();
+        }
     }
 }
