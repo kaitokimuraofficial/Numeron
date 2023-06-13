@@ -13,7 +13,7 @@ java Server.java
 その後
 ```
 javac Client.java
-java Cliet.java
+java Client.java
 ```
 を実行する
 
@@ -25,11 +25,11 @@ MainPanelと呼ばれる実際のゲームに画面が移行する
 
 ここで上のラベルが"YOUR TURN"になっているときテキストエリアに
 
-数字を入力してボタンを押して送信するとGame.javaで判定してそれを返してくれる
+数字を入力してボタンを押して送信するとJudge.javaで判定してそれを返してくれる
 
 ”WAIT”のときは"YOUR TURN"側がボタンを押すまでは何をしても動かないようになっている。
 
-本来はGame.javaに予想した数字を判定してもらってEatとBiteを返してもらうが
+本来はJudge.javaに予想した数字を判定してもらってEatとBiteを返してもらうが
 
 そこまではまだいけてないです。
 
