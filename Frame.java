@@ -78,7 +78,6 @@ public class Frame extends JFrame {
         myNumberField = sp.getMyNumber();
         expectedNumberField = mp.getExpectedNumber();
 
-        myNumber = myNumberField.getText();
         expectedNumber = expectedNumberField.getText();
 
         resultArea = mp.getResultArea();
@@ -181,8 +180,8 @@ public class Frame extends JFrame {
         return myNumberField;
     }
 
-    public JTextField getExpectedNumberField() {
-        return expectedNumberField;
+    public String getExpectedNumberField() {
+        return mp.expectedNumber.getText();
     }
 
     public String getMyNumber() {

@@ -85,7 +85,7 @@ class RulePanel extends JDialog {
         cp.setLayout(new FlowLayout(FlowLayout.CENTER));
         cp.setBackground(new Color(220, 255, 220));
         f = new Font("MS 明朝", Font.PLAIN, 20);
-        setSize(550, 160);
+        setSize(550, 320);
         ta = new JTextArea(5, 50);
         ta.setFont(f);
         ta.setEditable(false);

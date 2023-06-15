@@ -35,7 +35,7 @@ public class Judge {
 
     /* ^^^^^^^^^^^^判定に使うメソッドまとめ^^^^^^^^^^^^ */
     /* -------------相手の数として予想したものとtargetClientを入力して判定してもらう------------ */
-    public String[] startJudge(String inputNumber, int targetClientNumber) {
+    public String startJudge(String inputNumber, int targetClientNumber) {
         if (targetClientNumber == 1) {
             return calculateAll(inputNumber, number1);
         }
@@ -45,13 +45,14 @@ public class Judge {
     }
 
     /* -------------EatとBiteの数を調べてまとめて返す------------ */
-    public String[] calculateAll(String inputNumber, int[] targetNumber) {
-        
+    public String calculateAll(String inputNumber, int[] targetNumber) {
+        String answer;
         eatInAnswer = Integer.toString(calculateEat(inputNumber, targetNumber));
         biteInAnswer = Integer.toString(calculateBite(inputNumber, targetNumber));
 
-        return new String[] {eatInAnswer, biteInAnswer};
+        answer = eatInAnswer + biteInAnswer;
 
+        return answer;
     }
 
     /* -------------Eatの数を調べる------------- */
@@ -87,7 +88,7 @@ public class Judge {
         }
 
         for (int i = 0; i < SIZE; i++) {
-            for (int j = i; i < SIZE; j++) {
+            for (int j = i; j < SIZE; j++) {
                 if (expectedNumber[i] == correctNumber[j] && i == j) {
                     break;
                 }

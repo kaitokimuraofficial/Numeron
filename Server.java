@@ -37,12 +37,18 @@ public class Server extends Thread {
     private String expectedNumber1;
     private String expectedNumber2;
 
-    private String[] judgeResult1; /* Client1がClient2の数字を予想した判定結果 */
-    private String[] judgeResult2; /* Client2がClient1の数字を予想した判定結果 */
+    private String judgeResult1; /* Client1がClient2の数字を予想した判定結果 */
+    private String judgeResult2; /* Client2がClient1の数字を予想した判定結果 */
 
 
     private String que1;
     private String que2;
+
+    private String eat1;
+    private String bite1;
+
+    private String eat2;
+    private String bite2;
 
     Scanner scanner = new Scanner(System.in);
 
@@ -107,12 +113,14 @@ public class Server extends Thread {
                     try {
                         expectedNumber1 = bufferedReader1.readLine();
                         judgeResult1 = judge.startJudge(expectedNumber1, 2);
-                        if (judgeResult1[0] == Integer.toString(SIZE)) {
+                        eat1 = String.valueOf(judgeResult1.charAt(0));
+                        bite1 = String.valueOf(judgeResult1.charAt(1));
+                        if (eat1 == Integer.toString(SIZE)) {
                             sendToBothSocket("WIN", "LOSE");
                             System.out.println(SIZE);
                             break;
                         } else {
-                            bufferedWriter1.write(judgeResult1[0] + judgeResult1[1]);
+                            bufferedWriter1.write(eat1 + bite1);
                             bufferedWriter1.newLine();
                             bufferedWriter1.flush();
                         }
@@ -128,12 +136,15 @@ public class Server extends Thread {
                 while (true) {
                     try {
                         expectedNumber2 = bufferedReader2.readLine();
+                        System.out.println(expectedNumber2);
                         judgeResult2 = judge.startJudge(expectedNumber2, 1);
-                        if (judgeResult2[0] == Integer.toString(SIZE)) {
+                        eat2 = String.valueOf(judgeResult2.charAt(0));
+                        bite2 = String.valueOf(judgeResult2.charAt(1));
+                        if (eat2 == Integer.toString(SIZE)) {
                             sendToBothSocket("LOSE", "WIN");
                             break;
                         } else {
-                            bufferedWriter2.write(judgeResult2[0] + judgeResult2[1]);
+                            bufferedWriter2.write(eat2 + bite2);
                             bufferedWriter2.newLine();
                             bufferedWriter2.flush();
                         }

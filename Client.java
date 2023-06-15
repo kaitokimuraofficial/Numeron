@@ -62,7 +62,9 @@ public class Client implements ActionListener {
     public void decideAndSendMyNumber() {
         try {
             latch.await();
-            inputMyNumber = frame.getMyNumber(); 
+            inputMyNumber = frame.getMyNumberField().getText();
+            System.out.println(inputMyNumber);
+            System.out.println(SIZE); 
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -140,7 +142,8 @@ public class Client implements ActionListener {
             frame.executeInputMyNumberButton();
         }
         else if (e.getSource() == frame.decideExpectNumberButton) {
-            expectNumber = frame.getExpectedNumber();
+            expectNumber = frame.getExpectedNumberField();
+            System.out.println(expectNumber);
             sendSthToServer(expectNumber);
             try {
                 judgeResult = bufferedReader.readLine();

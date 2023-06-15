@@ -10,7 +10,7 @@ public class MainPanel extends JPanel{
 
     private JLabel mainLabel;
 
-    private JTextField expectedNumber;
+    public JTextField expectedNumber;
 
     private Font f;
     private JTextArea resultArea;
