@@ -176,8 +176,8 @@ public class Frame extends JFrame {
         return endLabel;
     }
 
-    public JTextField getMyNumberField() {
-        return myNumberField;
+    public String getMyNumberField() {
+        return myNumberField.getText();
     }
 
     public String getExpectedNumberField() {

@@ -1,6 +1,7 @@
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 
 /* Serverクラスでは各プレイヤーがどんな数字を決めたかを保存する
  * Clientクラスからソケット経由で送られてきた予想結果をJudgeクラスにて
@@ -50,6 +51,8 @@ public class Server extends Thread {
     private String eat2;
     private String bite2;
 
+    private CountDownLatch latch;
+
     Scanner scanner = new Scanner(System.in);
 
     /* サーバーソケットを立ち上げる
@@ -65,7 +68,7 @@ public class Server extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+        latch = new CountDownLatch(2);
         decideSize();
     }
 
@@ -82,23 +85,16 @@ public class Server extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        print("1");
-
         createThreadAndConnectSocket();
-        print("2");
     }
 
     public void createThreadAndConnectSocket() {
         thread1 = createSocketThread("1");
         thread2 = createSocketThread("2");
-        print("3");
 
         thread1.start();
         thread2.start();
-        print("4");
     }
-
-
 
     /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
     private Thread createSocketThread(String threadName) {
@@ -107,7 +103,6 @@ public class Server extends Thread {
                 connectFirstSocket();
                 decideFirstNumber();
                 waitForReplyFromFirstSocket();
-
                 
                 while (true) {
                     try {
@@ -115,6 +110,8 @@ public class Server extends Thread {
                         judgeResult1 = judge.startJudge(expectedNumber1, 2);
                         eat1 = String.valueOf(judgeResult1.charAt(0));
                         bite1 = String.valueOf(judgeResult1.charAt(1));
+                        System.out.println(eat1);
+                        System.out.println(bite1);
                         if (eat1 == Integer.toString(SIZE)) {
                             sendToBothSocket("WIN", "LOSE");
                             System.out.println(SIZE);
@@ -136,12 +133,12 @@ public class Server extends Thread {
                 while (true) {
                     try {
                         expectedNumber2 = bufferedReader2.readLine();
-                        System.out.println(expectedNumber2);
                         judgeResult2 = judge.startJudge(expectedNumber2, 1);
                         eat2 = String.valueOf(judgeResult2.charAt(0));
                         bite2 = String.valueOf(judgeResult2.charAt(1));
                         if (eat2 == Integer.toString(SIZE)) {
                             sendToBothSocket("LOSE", "WIN");
+                            System.out.println("OK");
                             break;
                         } else {
                             bufferedWriter2.write(eat2 + bite2);
@@ -195,8 +192,6 @@ public class Server extends Thread {
 
             /* ここでjudgeにnumber1にClient1の数字を読み込ませる */
             judge.setNumber1(tempNumber1);
-
-            System.out.println("START CONNECTSECOND");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -205,11 +200,13 @@ public class Server extends Thread {
     private void waitForReplyFromFirstSocket() {
         try {
             que1 = bufferedReader1.readLine();
+            latch.countDown();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
+            latch.await();
             bufferedWriter1.write("START");
             bufferedWriter1.newLine();
             bufferedWriter1.flush();
@@ -264,17 +261,19 @@ public class Server extends Thread {
     private void waitForReplyFromSecondSocket() {
         try {
             que2 = bufferedReader2.readLine();
+            latch.countDown();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         try {
+            latch.await();
             bufferedWriter2.write("START");
             bufferedWriter2.newLine();
             bufferedWriter2.flush();
         } catch (Exception e) {
             e.printStackTrace();;
         }
-        
     }
     
 

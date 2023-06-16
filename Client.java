@@ -25,6 +25,9 @@ public class Client implements ActionListener {
     private String expectNumber;
     private String judgeResult;
 
+    private String eat;
+    private String bite;
+
     
     /* Serverとソケット通信をつなぐ
      * つないだあとFrameクラスのframeを初期化
@@ -62,7 +65,7 @@ public class Client implements ActionListener {
     public void decideAndSendMyNumber() {
         try {
             latch.await();
-            inputMyNumber = frame.getMyNumberField().getText();
+            inputMyNumber = frame.getMyNumberField();
             System.out.println(inputMyNumber);
             System.out.println(SIZE); 
         } catch (Exception e) {
@@ -143,14 +146,16 @@ public class Client implements ActionListener {
         }
         else if (e.getSource() == frame.decideExpectNumberButton) {
             expectNumber = frame.getExpectedNumberField();
-            System.out.println(expectNumber);
             sendSthToServer(expectNumber);
             try {
                 judgeResult = bufferedReader.readLine();
-                if (judgeResult.equals("WIN") || judgeResult.equals("LOSE")) {
+                eat = Character.toString(judgeResult.charAt(0));
+                bite = Character.toString(judgeResult.charAt(1));
+                System.out.println(judgeResult);
+                if (eat.equals(Integer.toString(SIZE)) || judgeResult.equals("LOSE")) {
                     frame.changeIntoEndPanel(judgeResult);
                 } else {
-                        frame.appendToResutlArea("EAT : " + judgeResult.charAt(0) + "  BITE : " + judgeResult.charAt(1) + "\n");
+                    frame.appendToResutlArea("EAT : " + judgeResult.charAt(0) + "  BITE : " + judgeResult.charAt(1) + "\n");
                 }
             } catch (Exception exp) {
                 exp.printStackTrace();
