@@ -6,12 +6,13 @@ public class LoadPanel extends JPanel {
 
     public LoadPanel() {
         setLayout(new BorderLayout());
-        setSize(500, 350);
+        setSize(500, 450);
 
         setBackground(Color.BLUE);
         setLayout(new BorderLayout());
 
         loadLabel = new JLabel("NOW LOADING....");
+        loadLabel.setHorizontalAlignment(SwingConstants.CENTER);
         loadLabel.setFont(new Font("Arial", Font.BOLD | Font.ITALIC, 24));
 
         add(loadLabel, BorderLayout.CENTER);

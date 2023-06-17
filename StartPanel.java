@@ -8,6 +8,8 @@ public class StartPanel extends JPanel {
     private JPanel rulePart;
     private JPanel startPart;
 
+    private JLabel titleLabel;
+
     private RulePanel rp;
 
     private JButton ruleButton;
@@ -18,13 +20,14 @@ public class StartPanel extends JPanel {
 
     public StartPanel() {
         setLayout(new BorderLayout());
-        setSize(500, 350);
+        setSize(500, 450);
         titlePart = new JPanel();
         rulePart = new JPanel();
         startPart = new JPanel();
-        titlePart.setPreferredSize(new Dimension(500, 100));
-        rulePart.setPreferredSize(new Dimension(500, 100));
-        startPart.setPreferredSize(new Dimension(500, 100));
+        titlePart.setPreferredSize(new Dimension(500, 150));
+        rulePart.setPreferredSize(new Dimension(500, 150));
+        startPart.setPreferredSize(new Dimension(500, 150));
+        titleLabel = new JLabel("");
 
         titlePart.setBackground(Color.PINK);
         rulePart.setBackground(Color.YELLOW);
@@ -34,7 +37,8 @@ public class StartPanel extends JPanel {
 
         myNumber = new JTextField();
         myNumber.setPreferredSize(new Dimension(100, 20));
-
+        
+        titlePart.add(titleLabel);
         rulePart.add(ruleButton);
         startPart.add(myNumber);
         startPart.add(inputMyNumberButton);
@@ -55,6 +59,10 @@ public class StartPanel extends JPanel {
 
 
     /* -------------getメソッド------------- */
+    public JLabel getTitleLabel() {
+        return titleLabel;
+    }
+
     public JButton getRuleButton() {
         return ruleButton;
     }
@@ -85,7 +93,7 @@ class RulePanel extends JDialog {
         cp.setLayout(new FlowLayout(FlowLayout.CENTER));
         cp.setBackground(new Color(220, 255, 220));
         f = new Font("MS 明朝", Font.PLAIN, 20);
-        setSize(550, 320);
+        setSize(1000, 320);
         ta = new JTextArea(5, 50);
         ta.setFont(f);
         ta.setEditable(false);

@@ -18,14 +18,14 @@ public class MainPanel extends JPanel{
 
     public MainPanel() {
         setLayout(new BorderLayout());
-        setSize(500, 350);
+        setSize(500, 450);
         memoPart = new JPanel();
         inputPart = new JPanel();
         resultPart = new JPanel();
 
-        memoPart.setPreferredSize(new Dimension(500, 100));
-        inputPart.setPreferredSize(new Dimension(500, 100));
-        resultPart.setPreferredSize(new Dimension(500, 100));
+        memoPart.setPreferredSize(new Dimension(500, 150));
+        inputPart.setPreferredSize(new Dimension(500, 150));
+        resultPart.setPreferredSize(new Dimension(500, 150));
 
         memoPart.setBackground(Color.PINK);
         inputPart.setBackground(Color.YELLOW);
@@ -46,6 +46,7 @@ public class MainPanel extends JPanel{
 
         decideExpectNumberButton = new JButton("JUDGE");
 
+        resultPart.add(mainLabel);
         inputPart.add(expectedNumber);
         inputPart.add(decideExpectNumberButton);
 

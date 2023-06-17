@@ -50,6 +50,7 @@ public class Server extends Thread {
 
     private String eat2;
     private String bite2;
+    private int endCondition;
 
     private CountDownLatch latch;
 
@@ -59,9 +60,9 @@ public class Server extends Thread {
      * ゲームにて使用する数字の桁数(SIZE)を
      * decideSize()にて決定する
      */
-    public Server() {
+    public Server(int num) {
         System.out.println("Connecting...  HOST: " + HOST + " PORT: " + PORT);
-        
+        endCondition = num;
         try {
             serverSocket = new ServerSocket();
             serverSocket.bind(new InetSocketAddress(HOST, PORT));
@@ -110,16 +111,12 @@ public class Server extends Thread {
                         judgeResult1 = judge.startJudge(expectedNumber1, 2);
                         eat1 = String.valueOf(judgeResult1.charAt(0));
                         bite1 = String.valueOf(judgeResult1.charAt(1));
-                        System.out.println(eat1);
-                        System.out.println(bite1);
-                        if (eat1 == Integer.toString(SIZE)) {
-                            sendToBothSocket("WIN", "LOSE");
-                            System.out.println(SIZE);
-                            break;
+
+                        if (eat1.equals(Integer.toString(SIZE))) {
+                            sendToBothSocket("a" + bite1, "b" + bite1);
+                            endCondition = 1;
                         } else {
-                            bufferedWriter1.write(eat1 + bite1);
-                            bufferedWriter1.newLine();
-                            bufferedWriter1.flush();
+                            sendToBothSocket(judgeResult1, "b"+bite1);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -136,14 +133,22 @@ public class Server extends Thread {
                         judgeResult2 = judge.startJudge(expectedNumber2, 1);
                         eat2 = String.valueOf(judgeResult2.charAt(0));
                         bite2 = String.valueOf(judgeResult2.charAt(1));
-                        if (eat2 == Integer.toString(SIZE)) {
-                            sendToBothSocket("LOSE", "WIN");
-                            System.out.println("OK");
-                            break;
-                        } else {
-                            bufferedWriter2.write(eat2 + bite2);
-                            bufferedWriter2.newLine();
-                            bufferedWriter2.flush();
+
+                        if (endCondition == 0) {
+                            if (eat2.equals(Integer.toString(SIZE))) {
+                                sendToBothSocket("c" + bite2, "d" + bite2);
+                                break;
+                            } else {
+                                sendToBothSocket("b"+bite2, judgeResult2);
+                            }
+                        } else if (endCondition == 1) {
+                            if (eat2.equals(Integer.toString(SIZE))) {
+                                sendToBothSocket("e" + bite2, "e" + bite2);
+                                break;
+                            } else {
+                                sendToBothSocket("d" + bite2, "c" + bite2);
+                                break;
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -268,7 +273,7 @@ public class Server extends Thread {
 
         try {
             latch.await();
-            bufferedWriter2.write("START");
+            bufferedWriter2.write("SECOND");
             bufferedWriter2.newLine();
             bufferedWriter2.flush();
         } catch (Exception e) {
@@ -296,12 +301,9 @@ public class Server extends Thread {
     /* -------------setメソッド------------- */
 
     /* -------------Debug用メソッド------------- */
-    private void print(String str) {
-        System.out.println(str);
-    }
 
     /* -------------mainメソッド------------- */
     public static void main(String[] args) {
-        Server server = new Server();
+        Server server = new Server(0);
     }
 }

@@ -2,8 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Frame extends JFrame {
-    private Client client;
-
     private Container contentPane;
     private StartPanel sp;
     private LoadPanel lp;
@@ -14,7 +12,10 @@ public class Frame extends JFrame {
     public JButton inputMyNumberButton;         /* StartPanelで自分の数字を入力してServerに数字を送るボタン */
     public JButton decideExpectNumberButton;    /* MainPanelで予想した相手の数字をServerに送信して判定してもらうためのボタン */
     public JButton endButton;                   /* EndPanelでclickされるとWindowが閉じる */
+    public JButton repeatButton;                /* EndPanelでclickされると再戦する */
 
+
+    public JLabel titleLabel;
     private JLabel loadLabel;                   /* LoadPanelでLoading...を表示するJLabel */
     private JLabel mainLabel;                   /* MainPanelで結果を表示するJLabel */
     private JLabel endLabel;                    /* EndPanelのYou Win/Loseを表示するJLabel */
@@ -27,7 +28,6 @@ public class Frame extends JFrame {
 
     private JTextArea resultArea;               /* MainPanelでEatやBiteの結果をまとめるJTextArea */
 
-    private Boolean buttonEnabled;              /* Buttonが機能するかどうかのBoolean */
 
     private JPanel panel1;                      /* 今表示されているpanel2が何なのかを表示する */
     private JPanel panel2;                      /* このJPanelで入力操作が行われたりメモが表示される */               
@@ -35,33 +35,34 @@ public class Frame extends JFrame {
     private JLabel jl;                          /* 今表示されているpanel2が何かを表すJLabel */
 
 
-    public Frame(Client client) {
-        this.client = client;
+    public Frame() {
         contentPane = getContentPane();
         sp = new StartPanel();
         lp = new LoadPanel();
         mp = new MainPanel();
         ep = new EndPanel();
-
+        
         initializeComponent();
-
-        panel1 = new JPanel();
-        panel2 = new JPanel();
+        
+        panel1 = new JPanel(new BorderLayout());
+        panel2 = new JPanel(new BorderLayout());
         panel1.setPreferredSize(new Dimension(500, 50));
         panel2.setPreferredSize(new Dimension(500, 450));
         panel1.setBackground(Color.yellow);
         panel2.setBackground(Color.BLUE);
-
+        
         jl = new JLabel("START");
-
-        panel1.add(jl);
+        jl.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        panel1.add(jl, BorderLayout.CENTER);
         panel2.add(sp, BorderLayout.CENTER);
         setSize(500, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        contentPane.setLayout(new BorderLayout());
         contentPane.add(panel1, BorderLayout.NORTH);
         contentPane.add(panel2, BorderLayout.CENTER);
 
-        pack();
+        // pack();
         setVisible(true);
     }
 
@@ -70,7 +71,9 @@ public class Frame extends JFrame {
         inputMyNumberButton = sp.getinputMyNumberButton();
         decideExpectNumberButton = mp.getdecideExpectNumberButton();
         endButton = ep.getEndButton();
+        repeatButton = ep.getRepeatButton();
 
+        titleLabel = sp.getTitleLabel();
         loadLabel = lp.getLoadLabel();
         mainLabel = mp.getMainLabel();
         endLabel = ep.getEndLabel();
@@ -87,6 +90,14 @@ public class Frame extends JFrame {
 
     /* -------------パネルを変更するメソッド------------- */
 
+    public void changeIntoStartPanel() {
+        jl.setText("START");
+        contentPane.remove(panel2);
+        panel2.remove(ep);
+        panel2.add(sp);
+        contentPane.add(panel2);
+    }
+
     public void changeIntoLoadPanel() {
         jl.setText("LOAD");
         contentPane.remove(panel2);
@@ -101,6 +112,13 @@ public class Frame extends JFrame {
         panel2.remove(lp);
         panel2.add(mp);
         contentPane.add(panel2);
+        if (Turn.equals("START")) {
+            setButtonEnabled(true);
+            mp.setMainLabel("Now is Your Turn. Input some number.");
+        } else {
+            setButtonEnabled(false);
+            mp.setMainLabel("Now is not Your Turn. Wait for Seconds.");
+        }
     }
 
     public void changeIntoEndPanel(String Result) {
@@ -113,10 +131,6 @@ public class Frame extends JFrame {
     }
     
     /* -------------メソッド------------- */
-    
-    public void sendExpectNumberToServer() {
-        client.sendSthToServer(expectedNumber);
-    }
 
     /* -------------executeメソッド------------- */
     public void executeRuleButton() {
@@ -131,50 +145,11 @@ public class Frame extends JFrame {
         dispose();
     }
 
+    public void executeRepeatButton() {
+        changeIntoStartPanel();
+    }
+
     /* -------------getメソッド------------- */
-    public JPanel getStartPanel() {
-        return sp;
-    }
-    
-    public JPanel getLoadPanel() {
-        return lp;
-    }
-    
-    public JPanel getMainPanel() {
-        return mp;
-    }
-    
-    public JPanel getEndPanel() {
-        return ep;
-    } 
-
-    public JButton getRuleButton() {
-        return ruleButton;
-    }
-
-    public JButton getInputMyNumberButton() {
-        return inputMyNumberButton;
-    }
-
-    public JButton getDecideExpectNumberButton() {
-        return decideExpectNumberButton;
-    }
-
-    public JButton getEndButton() {
-        return endButton;
-    }
-
-    public JLabel getLoadLabel() {
-        return loadLabel;
-    }
-    
-    public JLabel getMainLabel() {
-        return mainLabel;
-    }
-
-    public JLabel getEndLabel() {
-        return endLabel;
-    }
 
     public String getMyNumberField() {
         return myNumberField.getText();
@@ -184,20 +159,12 @@ public class Frame extends JFrame {
         return mp.expectedNumber.getText();
     }
 
-    public String getMyNumber() {
-        return myNumber;
-    }
-
     public String getExpectedNumber() {
         return expectedNumber;
     }
 
     public JTextArea getResutArea() {
         return resultArea;
-    }
-
-    public Boolean getButtonEnabled() {
-        return buttonEnabled;
     }
 
     /* -------------setメソッド------------- */
@@ -217,7 +184,11 @@ public class Frame extends JFrame {
         resultArea.append(str);
     }
 
+    public void setMainLabel(String str) {
+        mp.setMainLabel(str);
+    }
+    
     public void setButtonEnabled(Boolean bool) {
-        this.buttonEnabled = bool;
+        decideExpectNumberButton.setEnabled(bool);
     }
 }

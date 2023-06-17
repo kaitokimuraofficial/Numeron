@@ -28,6 +28,8 @@ public class Client implements ActionListener {
     private String eat;
     private String bite;
 
+    private String que;
+
     
     /* Serverとソケット通信をつなぐ
      * つないだあとFrameクラスのframeを初期化
@@ -43,7 +45,7 @@ public class Client implements ActionListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        frame = new Frame(this);
+        frame = new Frame();
         addSthToActionListener();
         receiveSize();
     }
@@ -63,17 +65,11 @@ public class Client implements ActionListener {
      * sendQueToServerでこのclientが準備完了したことを伝える
     */
     public void decideAndSendMyNumber() {
-        try {
-            latch.await();
-            inputMyNumber = frame.getMyNumberField();
-            System.out.println(inputMyNumber);
-            System.out.println(SIZE); 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         try {
+            latch.await();
             sendSthToServer(inputMyNumber);
+            frame.changeIntoLoadPanel();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,18 +84,46 @@ public class Client implements ActionListener {
         }
 
         try {
-            bufferedReader.readLine();
+            que = bufferedReader.readLine();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        gameStart();
+        gameStart(que);
     }
 
-    public void gameStart() {
-        frame.changeIntoMainPanel(HOST);
+    public void gameStart(String que) {
+        frame.changeIntoMainPanel(que);
         endCondition = false;
         while (!endCondition) {
-
+            try {
+                judgeResult = bufferedReader.readLine();
+                eat = Character.toString(judgeResult.charAt(0));
+                bite = Character.toString(judgeResult.charAt(1));
+                System.out.println(judgeResult);
+                if (eat.equals("a") ) {
+                    frame.setButtonEnabled(false);
+                    frame.setMainLabel("You made a prediction! If client2 makes a prediction, DRAW, if not, WIN!");
+                } else if (eat.equals("b")) {
+                    frame.setButtonEnabled(true);
+                    frame.setMainLabel("Now is Your Turn. Input some number.");
+                } else if (eat.equals("c")) {
+                    frame.changeIntoEndPanel("LOSE");
+                    break;
+                } else if (eat.equals("d")) {
+                    frame.changeIntoEndPanel("WIN");
+                    break;
+                } else if (eat.equals("e")) {
+                    frame.changeIntoEndPanel("DRAW");
+                    break;
+                } else {
+                    frame.appendToResutlArea(judgeResult + " :: EAT : " + judgeResult.charAt(0) + "  BITE : "
+                            + judgeResult.charAt(1) + "\n");
+                    frame.setButtonEnabled(false);
+                    frame.setMainLabel("Now is not Your Turn. Wait for Seconds.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
     
@@ -124,10 +148,29 @@ public class Client implements ActionListener {
         latch = new CountDownLatch(1);
     }
 
-    /* -------------Debug用メソッド------------- */
-        private void print(String str) {
-        System.out.println(str);
+    public int noOverlap(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            char currentChar = str.charAt(i);
+            if (!Character.isDigit(currentChar)) {
+                return 1;
+            }
+        }
+        
+        if (str.length() != SIZE) {
+            return 2;
+        }
+
+        for (int i = 0; i < SIZE; i++) {
+            char currentChar = str.charAt(i);
+            if (str.indexOf(currentChar, i + 1) != -1) {
+                return 3;
+            }
+        }
+        return 0;
+ 
     }
+
+    /* -------------Debug用メソッド------------- */
 
     /* -------------mainメソッド------------- */
     public static void main(String[] args) {
@@ -141,28 +184,29 @@ public class Client implements ActionListener {
             frame.executeRuleButton();
         }
         else if (e.getSource() == frame.inputMyNumberButton) {
-            latch.countDown();
-            frame.executeInputMyNumberButton();
-        }
-        else if (e.getSource() == frame.decideExpectNumberButton) {
+            inputMyNumber = frame.getMyNumberField();
+            System.out.println(inputMyNumber);
+            System.out.println(SIZE);
+            switch (noOverlap(inputMyNumber)) {
+                case 0:
+                    latch.countDown();
+                    break;
+
+                case 1:
+                    frame.titleLabel.setText("数字以外は入力できません");
+                    break;
+                case 2:
+                    frame.titleLabel.setText("入力した数字は桁数が不正です。" + Integer.toString(SIZE) + "桁入力してください");
+                    break;
+                case 3:
+                    frame.titleLabel.setText("数字を重複して使うことはできません");
+                    break;
+            }
+        } else if (e.getSource() == frame.decideExpectNumberButton) {
             expectNumber = frame.getExpectedNumberField();
             sendSthToServer(expectNumber);
-            try {
-                judgeResult = bufferedReader.readLine();
-                eat = Character.toString(judgeResult.charAt(0));
-                bite = Character.toString(judgeResult.charAt(1));
-                System.out.println(judgeResult);
-                if (eat.equals(Integer.toString(SIZE)) || judgeResult.equals("LOSE")) {
-                    frame.changeIntoEndPanel(judgeResult);
-                } else {
-                    frame.appendToResutlArea("EAT : " + judgeResult.charAt(0) + "  BITE : " + judgeResult.charAt(1) + "\n");
-                }
-            } catch (Exception exp) {
-                exp.printStackTrace();
-            }
-        }
-        else if (e.getSource() == frame.endButton) {
+        } else if (e.getSource() == frame.endButton) {
             frame.executeEndButton();
-        }
+        } 
     }
 }
