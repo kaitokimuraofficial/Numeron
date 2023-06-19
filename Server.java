@@ -52,6 +52,8 @@ public class Server extends Thread {
     private String bite2;
     private int endCondition;
 
+    private Boolean bool = true;
+
     private CountDownLatch latch;
 
     Scanner scanner = new Scanner(System.in);
@@ -105,9 +107,14 @@ public class Server extends Thread {
                 decideFirstNumber();
                 waitForReplyFromFirstSocket();
                 
-                while (true) {
+                while (bool) {
                     try {
                         expectedNumber1 = bufferedReader1.readLine();
+                        if (expectedNumber1.equals("end")) {
+                            endServerandClient1();
+                            bool = false;
+                            System.exit(0);
+                        }
                         judgeResult1 = judge.startJudge(expectedNumber1, 2);
                         eat1 = String.valueOf(judgeResult1.charAt(0));
                         bite1 = String.valueOf(judgeResult1.charAt(1));
@@ -127,9 +134,14 @@ public class Server extends Thread {
                 decideSecondNumber();
                 waitForReplyFromSecondSocket();
 
-                while (true) {
+                while (bool) {
                     try {
                         expectedNumber2 = bufferedReader2.readLine();
+                        if (expectedNumber2.equals("end")) {
+                            endServerandClient2();
+                            bool = false;
+                            System.exit(0);
+                        }
                         judgeResult2 = judge.startJudge(expectedNumber2, 1);
                         eat2 = String.valueOf(judgeResult2.charAt(0));
                         bite2 = String.valueOf(judgeResult2.charAt(1));
@@ -137,17 +149,14 @@ public class Server extends Thread {
                         if (endCondition == 0) {
                             if (eat2.equals(Integer.toString(SIZE))) {
                                 sendToBothSocket("c" + bite2, "d" + bite2);
-                                break;
                             } else {
                                 sendToBothSocket("b"+bite2, judgeResult2);
                             }
                         } else if (endCondition == 1) {
                             if (eat2.equals(Integer.toString(SIZE))) {
                                 sendToBothSocket("e" + bite2, "e" + bite2);
-                                break;
                             } else {
                                 sendToBothSocket("d" + bite2, "c" + bite2);
-                                break;
                             }
                         }
                     } catch (Exception e) {
@@ -277,10 +286,17 @@ public class Server extends Thread {
             bufferedWriter2.newLine();
             bufferedWriter2.flush();
         } catch (Exception e) {
-            e.printStackTrace();;
+            e.printStackTrace();
         }
     }
     
+    private void endServerandClient1() {
+        sendToBothSocket("af", "ff");
+    }
+
+    private void endServerandClient2() {
+        sendToBothSocket("ff", "af");
+    }    
 
     /* -------------両方のソケットに送信するメソッド------------- */
     private void sendToBothSocket(String str1, String str2) {

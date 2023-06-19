@@ -9,17 +9,20 @@ public class EndPanel extends JPanel {
     private JButton repeatButton;
 
     public EndPanel() {
-        setLayout(new BorderLayout());
+        setLayout(new GridLayout(1,3));
         setSize(500, 450);
 
         endPart = new JPanel();
 
         endLabel = new JLabel("You ");
         endButton = new JButton("Close Window");
+        repeatButton = new JButton("One More Game");
         endButton.setPreferredSize(new Dimension(200, 50));
+        repeatButton.setPreferredSize(new Dimension(200, 50));
 
-        endPart.add(endLabel, BorderLayout.NORTH);
-        endPart.add(endButton, BorderLayout.CENTER);
+        endPart.add(endLabel);
+        endPart.add(endButton);
+        endPart.add(repeatButton);
         
         add(endPart);
     }

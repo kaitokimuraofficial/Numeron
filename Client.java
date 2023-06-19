@@ -100,7 +100,7 @@ public class Client implements ActionListener {
                 eat = Character.toString(judgeResult.charAt(0));
                 bite = Character.toString(judgeResult.charAt(1));
                 System.out.println(judgeResult);
-                if (eat.equals("a") ) {
+                if (eat.equals("a")) {
                     frame.setButtonEnabled(false);
                     frame.setMainLabel("You made a prediction! If client2 makes a prediction, DRAW, if not, WIN!");
                 } else if (eat.equals("b")) {
@@ -108,13 +108,13 @@ public class Client implements ActionListener {
                     frame.setMainLabel("Now is Your Turn. Input some number.");
                 } else if (eat.equals("c")) {
                     frame.changeIntoEndPanel("LOSE");
-                    break;
                 } else if (eat.equals("d")) {
                     frame.changeIntoEndPanel("WIN");
-                    break;
                 } else if (eat.equals("e")) {
                     frame.changeIntoEndPanel("DRAW");
-                    break;
+                } else if (eat.equals("f")) {
+                    endCondition = true;
+                    frame.executeEndButton();
                 } else {
                     frame.appendToResutlArea(judgeResult + " :: EAT : " + judgeResult.charAt(0) + "  BITE : "
                             + judgeResult.charAt(1) + "\n");
@@ -144,6 +144,7 @@ public class Client implements ActionListener {
         frame.inputMyNumberButton.addActionListener(this);
         frame.decideExpectNumberButton.addActionListener(this);
         frame.endButton.addActionListener(this);
+        frame.repeatButton.addActionListener(this);
 
         latch = new CountDownLatch(1);
     }
@@ -207,6 +208,10 @@ public class Client implements ActionListener {
             sendSthToServer(expectNumber);
         } else if (e.getSource() == frame.endButton) {
             frame.executeEndButton();
-        } 
+            sendSthToServer("end");
+            endCondition = true;
+        } else if (e.getSource() == frame.repeatButton) {
+            frame.executeRepeatButton();
+        }
     }
 }
