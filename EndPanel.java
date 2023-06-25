@@ -5,7 +5,6 @@ public class EndPanel extends JPanel {
     private JPanel endPart;
     private JLabel endLabel;
     private JButton endButton;
-
     private JButton repeatButton;
 
     public EndPanel() {
@@ -16,7 +15,7 @@ public class EndPanel extends JPanel {
 
         endLabel = new JLabel("You ");
         endButton = new JButton("Close Window");
-        repeatButton = new JButton("One More Game");
+        repeatButton = new JButton("REPEAT");
         endButton.setPreferredSize(new Dimension(200, 50));
         repeatButton.setPreferredSize(new Dimension(200, 50));
 

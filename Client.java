@@ -19,7 +19,8 @@ public class Client implements ActionListener {
 
     private Frame frame;
 
-    private String inputMyNumber;
+    private String myNumber;
+    private String inputNextSize;
     
     private Boolean endCondition;
     private String expectNumber;
@@ -28,8 +29,7 @@ public class Client implements ActionListener {
     private String eat;
     private String bite;
 
-    private String que;
-
+    private String initialOrder;
     
     /* Serverとソケット通信をつなぐ
      * つないだあとFrameクラスのframeを初期化
@@ -45,14 +45,15 @@ public class Client implements ActionListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        frame = new Frame();
-        addSthToActionListener();
+        initialOrder = "INITIALSTATE";
         receiveSize();
     }
     
     public void receiveSize() {
         try {
             SIZE = Integer.parseInt(bufferedReader.readLine());
+            frame = new Frame();
+            addSthToActionListener();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -62,39 +63,37 @@ public class Client implements ActionListener {
     /* 自分の数字を決める 
      * inputMyNumberはframeのStartPanelから入力された数字である。
      * inputMyNumberから数字を得たあとはソケット通信でそれを送る
-     * sendQueToServerでこのclientが準備完了したことを伝える
+     * sendinitialOrderToServerでこのclientが準備完了したことを伝える
     */
     public void decideAndSendMyNumber() {
-
-        try {
-            latch.await();
-            sendSthToServer(inputMyNumber);
-            frame.changeIntoLoadPanel();
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (true) {
+            latch = new CountDownLatch(1);
+            System.out.println(latch);
+            try {
+                latch.await();
+                sendSthToServer(myNumber);
+                System.out.println(myNumber);
+                frame.changeIntoLoadPanel();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                initialOrder = bufferedReader.readLine();
+                System.out.println(initialOrder);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            gameStart(initialOrder);
         }
-        sendQueToServer();
     }
 
-    public void sendQueToServer() {
-        try {
-            sendSthToServer("QUE");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void gameStart(String initialOrder) {
+        System.out.println(initialOrder);
+        frame.changeIntoMainPanel(initialOrder);
 
-        try {
-            que = bufferedReader.readLine();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        gameStart(que);
-    }
-
-    public void gameStart(String que) {
-        frame.changeIntoMainPanel(que);
         endCondition = false;
         while (!endCondition) {
+            System.out.println("gameStart");
             try {
                 judgeResult = bufferedReader.readLine();
                 eat = Character.toString(judgeResult.charAt(0));
@@ -115,6 +114,27 @@ public class Client implements ActionListener {
                 } else if (eat.equals("f")) {
                     endCondition = true;
                     frame.executeEndButton();
+                    System.exit(0);
+                } else if (eat.equals("g")) {
+                    endCondition = true;
+                    frame.executeEndButton();
+                } else if (eat.equals("i")) {
+                    SIZE = Integer.valueOf(bufferedReader.readLine());
+                    endCondition = true;
+                    frame.changeIntoStartPanel();
+                    return;
+                } else if (eat.equals("W")) {
+                    frame.changeIntoWaitPanel();
+                    inputNextSize = bufferedReader.readLine();
+                    if (inputNextSize.equals("R")) {
+                        frame.changeIntoRepeatPanel();
+                        continue;
+                    } else {
+                        frame.waitLabel.setText("IS " + inputNextSize + " OK?");
+                        frame.setAcceptButtonEnabaled(true);
+                    }
+                } else if (eat.equals("R")) {
+                    frame.changeIntoRepeatPanel();
                 } else {
                     frame.appendToResutlArea(judgeResult + " :: EAT : " + judgeResult.charAt(0) + "  BITE : "
                             + judgeResult.charAt(1) + "\n");
@@ -142,11 +162,17 @@ public class Client implements ActionListener {
     public void addSthToActionListener() {
         frame.ruleButton.addActionListener(this);
         frame.inputMyNumberButton.addActionListener(this);
+        
         frame.decideExpectNumberButton.addActionListener(this);
+        
         frame.endButton.addActionListener(this);
         frame.repeatButton.addActionListener(this);
-
-        latch = new CountDownLatch(1);
+        
+        frame.cancelButton.addActionListener(this);
+        frame.inputNextSizeButton.addActionListener(this);
+        
+        frame.waitEndButton.addActionListener(this);
+        frame.acceptButton.addActionListener(this);
     }
 
     public int noOverlap(String str) {
@@ -168,10 +194,8 @@ public class Client implements ActionListener {
             }
         }
         return 0;
- 
     }
 
-    /* -------------Debug用メソッド------------- */
 
     /* -------------mainメソッド------------- */
     public static void main(String[] args) {
@@ -183,35 +207,41 @@ public class Client implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == frame.ruleButton) {
             frame.executeRuleButton();
-        }
-        else if (e.getSource() == frame.inputMyNumberButton) {
-            inputMyNumber = frame.getMyNumberField();
-            System.out.println(inputMyNumber);
-            System.out.println(SIZE);
-            switch (noOverlap(inputMyNumber)) {
+        } else if (e.getSource() == frame.inputMyNumberButton) {
+            myNumber = frame.getMyNumber();
+            switch (noOverlap(myNumber)) {
                 case 0:
                     latch.countDown();
                     break;
-
                 case 1:
-                    frame.titleLabel.setText("数字以外は入力できません");
+                    frame.setTitleLabel("数字以外は入力できません");
                     break;
                 case 2:
-                    frame.titleLabel.setText("入力した数字は桁数が不正です。" + Integer.toString(SIZE) + "桁入力してください");
+                    frame.setTitleLabel("入力した数字は桁数が不正です。" + Integer.toString(SIZE) + "桁入力してください");
                     break;
                 case 3:
-                    frame.titleLabel.setText("数字を重複して使うことはできません");
+                    frame.setTitleLabel("数字を重複して使うことはできません");
                     break;
             }
         } else if (e.getSource() == frame.decideExpectNumberButton) {
-            expectNumber = frame.getExpectedNumberField();
+            expectNumber = frame.getExpectedNumber();
             sendSthToServer(expectNumber);
         } else if (e.getSource() == frame.endButton) {
-            frame.executeEndButton();
             sendSthToServer("end");
-            endCondition = true;
         } else if (e.getSource() == frame.repeatButton) {
-            frame.executeRepeatButton();
-        }
+            sendSthToServer("repeat");
+        } else if (e.getSource() == frame.cancelButton) {
+            sendSthToServer("cancel");
+        } else if (e.getSource() == frame.inputNextSizeButton) {
+            sendSthToServer("INS");
+            sendSthToServer(frame.getNextSize());
+            System.out.println(frame.getNextSize());
+            frame.setCancelButtonEnabaled(false);
+            frame.setInputNextSizeButtonEnabaled(false);
+        } else if (e.getSource() == frame.waitEndButton) {
+            sendSthToServer("waitEnd");
+        } else if (e.getSource() == frame.acceptButton) {
+            sendSthToServer("accept");
+        } 
     }
 }

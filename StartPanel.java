@@ -10,12 +10,12 @@ public class StartPanel extends JPanel {
 
     private JLabel titleLabel;
 
-    private RulePanel rp;
+    private RulePanel rulePanel;
 
     private JButton ruleButton;
     private JButton inputMyNumberButton;
 
-    private JTextField myNumber;
+    private JTextField myNumberField;
 
 
     public StartPanel() {
@@ -29,29 +29,29 @@ public class StartPanel extends JPanel {
         startPart.setPreferredSize(new Dimension(500, 150));
         titleLabel = new JLabel("");
 
-        titlePart.setBackground(Color.PINK);
-        rulePart.setBackground(Color.YELLOW);
+        titlePart.setBackground(Color.red);
+        rulePart.setBackground(Color.pink);
 
         ruleButton = new JButton("RULE");
         inputMyNumberButton = new JButton("GAME START");
 
-        myNumber = new JTextField();
-        myNumber.setPreferredSize(new Dimension(100, 20));
+        myNumberField = new JTextField();
+        myNumberField.setPreferredSize(new Dimension(100, 20));
         
         titlePart.add(titleLabel);
         rulePart.add(ruleButton);
-        startPart.add(myNumber);
+        startPart.add(myNumberField);
         startPart.add(inputMyNumberButton);
         add(titlePart, BorderLayout.NORTH);
         add(rulePart, BorderLayout.CENTER);
         add(startPart, BorderLayout.SOUTH);
 
-        setBackground(Color.RED);
+        setBackground(Color.pink);
     }
 
     public void executeRulePanel() {
-        rp = new RulePanel();
-        rp.setVisible(true);
+        rulePanel = new RulePanel();
+        rulePanel.setVisible(true);
         requestFocusInWindow();
     }
 
@@ -71,13 +71,13 @@ public class StartPanel extends JPanel {
         return inputMyNumberButton;
     }
 
-    public JTextField getMyNumber() {
-        return myNumber;
+    public JTextField getMyNumberField() {
+        return myNumberField;
     }
 
     /* -------------setメソッド------------- */
-    public void setMyNumber(String str) {
-        myNumber.setText(str);
+    public void setMyNumberField(String str) {
+        myNumberField.setText(str);
     }
 }
 

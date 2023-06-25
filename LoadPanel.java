@@ -8,7 +8,7 @@ public class LoadPanel extends JPanel {
         setLayout(new BorderLayout());
         setSize(500, 450);
 
-        setBackground(Color.BLUE);
+        setBackground(Color.pink);
         setLayout(new BorderLayout());
 
         loadLabel = new JLabel("NOW LOADING....");

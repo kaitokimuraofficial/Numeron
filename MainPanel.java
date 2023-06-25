@@ -10,7 +10,7 @@ public class MainPanel extends JPanel{
 
     private JLabel mainLabel;
 
-    public JTextField expectedNumber;
+    public JTextField expectedNumberField;
 
     private Font f;
     private JTextArea resultArea;
@@ -28,8 +28,8 @@ public class MainPanel extends JPanel{
         resultPart.setPreferredSize(new Dimension(500, 150));
 
         memoPart.setBackground(Color.PINK);
-        inputPart.setBackground(Color.YELLOW);
-        resultPart.setBackground(Color.green);
+        inputPart.setBackground(Color.pink);
+        resultPart.setBackground(Color.pink);
 
         resultArea = new JTextArea(5, 50);
         resultArea.setFont(f);
@@ -41,13 +41,13 @@ public class MainPanel extends JPanel{
 
         memoPart.add(resultArea);
 
-        expectedNumber = new JTextField();
-        expectedNumber.setPreferredSize(new Dimension(100, 20));
+        expectedNumberField = new JTextField();
+        expectedNumberField.setPreferredSize(new Dimension(100, 20));
 
         decideExpectNumberButton = new JButton("JUDGE");
 
         resultPart.add(mainLabel);
-        inputPart.add(expectedNumber);
+        inputPart.add(expectedNumberField);
         inputPart.add(decideExpectNumberButton);
 
         add(memoPart, BorderLayout.NORTH);
@@ -68,8 +68,8 @@ public class MainPanel extends JPanel{
         return mainLabel;
     }
     
-    public JTextField getExpectedNumber() {
-        return expectedNumber;
+    public JTextField getExpectedNumberField() {
+        return expectedNumberField;
     }
 
     public JTextArea getResultArea() {

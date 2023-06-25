@@ -1,4 +1,4 @@
-//This class works as judge.
+
 
 public class Judge {
 
@@ -16,21 +16,19 @@ public class Judge {
     char[] result2;
     
 
-    /* 自分自身を持っているServerクラスのserverを
-     * コンストラクタの中で持つことにする
-     * またSIZEとnumber1とnumber2も初期化する
-     */
-    public Judge(Server server, int SIZE) {
+    /* 自分自身を持っているServerクラスのserverを持つ */
+    public Judge(Server server) {
         this.server = server;
-        this.SIZE = SIZE;
+    }
+
+    /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
+
+    public void init() {
         number1 = new int[SIZE];
         number2 = new int[SIZE];
         result1 = new char[SIZE];
         result2 = new char[SIZE];
     }
-
-    /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
-
     
 
     /* ^^^^^^^^^^^^判定に使うメソッドまとめ^^^^^^^^^^^^ */
@@ -103,9 +101,6 @@ public class Judge {
 
 
     /* ^^^^^^^^^^^^getメソッド^^^^^^^^^^^^ */
-    public int getSize() {
-        return SIZE;
-    }
 
     public int[] getNumber1() {
         return number1;
@@ -117,6 +112,11 @@ public class Judge {
 
 
     /* ^^^^^^^^^^^^setメソッド^^^^^^^^^^^^ */
+
+    public void setSIZE(int size) {
+        this.SIZE = size;
+    }
+
     public void setNumber1(String tempNumber1) {
         for (int i = 0; i < SIZE; i++) {
             number1[i] = Character.getNumericValue(tempNumber1.charAt(i));

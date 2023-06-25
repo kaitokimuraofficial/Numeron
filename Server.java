@@ -9,9 +9,14 @@ import java.util.concurrent.CountDownLatch;
  */
 public class Server extends Thread {
 
+    private static final int NOTCHECKMATE = 0;
+    private static final int CHECKMATE = 1;
+
     private static String HOST = "127.0.0.1";
     private static int PORT = 1234;
     private static int SIZE;
+
+    private String nextSize;
 
     private static ServerSocket serverSocket;
     
@@ -29,21 +34,21 @@ public class Server extends Thread {
 
     private Judge judge;
 
+    private Thread preThread1;
+    private Thread preThread2;
     private Thread thread1;
     private Thread thread2;
 
-    private String tempNumber1;
-    private String tempNumber2;
+    private Boolean isGameFinished;
+
+    private String firstThreadNumber;
+    private String secondThreadNumber;
 
     private String expectedNumber1;
     private String expectedNumber2;
 
     private String judgeResult1; /* Client1がClient2の数字を予想した判定結果 */
     private String judgeResult2; /* Client2がClient1の数字を予想した判定結果 */
-
-
-    private String que1;
-    private String que2;
 
     private String eat1;
     private String bite1;
@@ -52,128 +57,225 @@ public class Server extends Thread {
     private String bite2;
     private int endCondition;
 
-    private Boolean bool = true;
+    private Boolean interrupted;
 
-    private CountDownLatch latch;
 
-    Scanner scanner = new Scanner(System.in);
+    public CountDownLatch latch;
+    public CountDownLatch latch2;
 
-    /* サーバーソケットを立ち上げる
-     * ゲームにて使用する数字の桁数(SIZE)を
-     * decideSize()にて決定する
-     */
-    public Server(int num) {
+    private Scanner scanner = new Scanner(System.in);
+
+    /* サーバーソケットを立ち上げる */
+    public Server() {
         System.out.println("Connecting...  HOST: " + HOST + " PORT: " + PORT);
-        endCondition = num;
+        isGameFinished = false;
+        nextSize = "";
         try {
             serverSocket = new ServerSocket();
             serverSocket.bind(new InetSocketAddress(HOST, PORT));
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        judge = new Judge(this);
+
+        /* 1個のスレッドがコネクトされるごとに1つずつlatchが減る */
         latch = new CountDownLatch(2);
         decideSize();
     }
 
-    /* プロンプト上で入力された数字を桁数(SIZE)として設定する
-     * judgeを宣言する。judgeのコンストラクタではnubmer1,2の初期化が行われる
-     */
+    /* プロンプト上で入力された数字を桁数(SIZE)として設定する */
     private void decideSize() {
         System.out.print("Enter the Number: ");
 
         try {
             SIZE = Integer.parseInt(scanner.nextLine());
             System.out.println("SIZE is " + SIZE);
-            judge = new Judge(this, SIZE);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        createThreadAndConnectSocket();
+        connectSocket();
     }
 
-    public void createThreadAndConnectSocket() {
-        thread1 = createSocketThread("1");
-        thread2 = createSocketThread("2");
+    public void connectSocket() {
+        preThread1 = connectEachSocket("1");
+        preThread2 = connectEachSocket("2");
 
-        thread1.start();
-        thread2.start();
+        /* ここで2つのソケットがコネクトされる */
+        preThread1.start();
+        preThread2.start();
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        gameStart();
+    }
+
+    public void gameStart() {
+        judgeInit();
+        sendToBothSocket(Integer.toString(SIZE), Integer.toString(SIZE));
+
+        /* それぞれの番号を決定する */
+        
+        while (!isGameFinished) {
+            interrupted = false;
+            latch = new CountDownLatch(2);
+            thread1 = startEachThread("1");
+            thread2 = startEachThread("2");
+            latch2 = new CountDownLatch(1);
+            thread1.start();
+            thread2.start();
+            try {
+                latch2.await();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
-    private Thread createSocketThread(String threadName) {
+
+    private Thread connectEachSocket(String threadName) {
         return new Thread(() -> {
             if (threadName.equals("1")) {
                 connectFirstSocket();
-                decideFirstNumber();
-                waitForReplyFromFirstSocket();
-                
-                while (bool) {
-                    try {
-                        expectedNumber1 = bufferedReader1.readLine();
-                        if (expectedNumber1.equals("end")) {
-                            endServerandClient1();
-                            bool = false;
-                            System.exit(0);
-                        }
-                        judgeResult1 = judge.startJudge(expectedNumber1, 2);
-                        eat1 = String.valueOf(judgeResult1.charAt(0));
-                        bite1 = String.valueOf(judgeResult1.charAt(1));
-
-                        if (eat1.equals(Integer.toString(SIZE))) {
-                            sendToBothSocket("a" + bite1, "b" + bite1);
-                            endCondition = 1;
-                        } else {
-                            sendToBothSocket(judgeResult1, "b"+bite1);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
             } else if (threadName.equals("2")) {
                 connectSecondSocket();
-                decideSecondNumber();
-                waitForReplyFromSecondSocket();
-
-                while (bool) {
-                    try {
-                        expectedNumber2 = bufferedReader2.readLine();
-                        if (expectedNumber2.equals("end")) {
-                            endServerandClient2();
-                            bool = false;
-                            System.exit(0);
-                        }
-                        judgeResult2 = judge.startJudge(expectedNumber2, 1);
-                        eat2 = String.valueOf(judgeResult2.charAt(0));
-                        bite2 = String.valueOf(judgeResult2.charAt(1));
-
-                        if (endCondition == 0) {
-                            if (eat2.equals(Integer.toString(SIZE))) {
-                                sendToBothSocket("c" + bite2, "d" + bite2);
-                            } else {
-                                sendToBothSocket("b"+bite2, judgeResult2);
-                            }
-                        } else if (endCondition == 1) {
-                            if (eat2.equals(Integer.toString(SIZE))) {
-                                sendToBothSocket("e" + bite2, "e" + bite2);
-                            } else {
-                                sendToBothSocket("d" + bite2, "c" + bite2);
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
             }
         });
     }
+
+    private Thread startEachThread (String threadName) {
+        return new Thread(() -> {
+            if (threadName.equals("1")) {
+                decideFirstNumber();
+                try {
+                    latch.await();
+                    sendToBothSocket("START", "WAIT");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                listenFromClient1();
+            } else if (threadName.equals("2")) {
+                decideSecondNumber();
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                listenFromClient2();
+            }
+        });
+    }
+
+
+    public void listenFromClient1() {
+        while (true) {
+            try {
+                expectedNumber1 = bufferedReader1.readLine();
+                if (interrupted) {
+                    break;
+                }
+                if (expectedNumber1.equals("end")) {
+                    sendToBothSocket("ff", "ff");
+                    System.exit(0);
+                } else if (expectedNumber1.equals("repeat")) {
+                    sendToBothSocket("RR", "WW");
+                } else if (expectedNumber1.equals("cancel")) {
+                    sendToBothSocket("RR", "RR");
+                } else if (expectedNumber1.equals("INS")) {
+                    nextSize = bufferedReader1.readLine();
+                    bufferedWriter2.write(nextSize);
+                    bufferedWriter2.newLine();
+                    bufferedWriter2.flush();
+                    try {
+                        latch2.await();
+                        break;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (expectedNumber1.equals("waitEnd")) {
+                    sendToBothSocket("gg", "gg");
+                    isGameFinished = true;
+                    System.exit(0);
+                } else if (expectedNumber1.equals("accept")) {
+                    sendToBothSocket("ii", "ii");
+                    sendToBothSocket(nextSize, nextSize);
+                    latch = new CountDownLatch(2);
+                    interrupted = true;
+                    SIZE = Integer.valueOf(nextSize);
+                    latch2.countDown();
+                    return;
+                } else {
+                    decideNextAction1(expectedNumber1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void listenFromClient2() {
+        while (true) {
+            try {
+                expectedNumber2 = bufferedReader2.readLine();
+                if (interrupted) {
+                    break;
+                }
+                if (expectedNumber2.equals("end")) {
+                    sendToBothSocket("ff", "ff");
+                    System.exit(0);
+                } else if (expectedNumber2.equals("repeat")) {
+                    sendToBothSocket("WW", "RR");
+                } else if (expectedNumber2.equals("cancel")) {
+                    sendToBothSocket("RR", "RR");
+                } else if (expectedNumber2.equals("INS")) {
+                    nextSize = bufferedReader2.readLine();
+                    bufferedWriter1.write(nextSize);
+                    bufferedWriter1.newLine();
+                    bufferedWriter1.flush();
+                    try {
+                        latch2.await();
+                        break;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else if (expectedNumber2.equals("waitEnd")) {
+                    sendToBothSocket("gg", "gg");
+                    isGameFinished = true;
+                    System.exit(0);
+                } else if (expectedNumber2.equals("accept")) {
+                    sendToBothSocket("ii", "ii");
+                    sendToBothSocket(nextSize, nextSize);
+                    interrupted = true;
+                    SIZE = Integer.valueOf(nextSize);
+                    latch2.countDown();
+                    return;
+                } else {
+                    decideNextAction2(expectedNumber2);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
     
-    /* -------------ソケットの初期化メソッド------------- */
+    /* このメソッドでjudgeのSIZEと配列を初期化する */
+    public void judgeInit() {
+        judge.setSIZE(SIZE);
+        judge.init();
+    }
+
+    
+    /* -------------ソケットの初期化メソッド------------- */ 
     /* 1つ目のソケットをconnectする
      * ソケット通信にて必要なものを初期化する
      * ソケットがつながったあとdecideFirstNumber()によって1つ目の
      * Clientが相手に予想させる数字を決める
      */
-    private void connectFirstSocket() {
+    public void connectFirstSocket() {
         try {
             socket1 = serverSocket.accept();
             System.out.println("Connected 1st Socket!");
@@ -185,56 +287,33 @@ public class Server extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        latch.countDown();
     }
 
     /* まず最初にSIZEをClient1に送信する
     * Client1はもらったSIZE桁の数字を決めたあと
     * Serverに送信し返すのでそれをnumber1[]に格納する
     */
-    private void decideFirstNumber() {
+    public void decideFirstNumber() {
         try {
-            bufferedWriter1.write(String.valueOf(SIZE));
-            bufferedWriter1.newLine();
-            bufferedWriter1.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            tempNumber1 = bufferedReader1.readLine();
-            System.out.println("Player1 decided its Number: " + tempNumber1);
+            firstThreadNumber = bufferedReader1.readLine();
+            System.out.println("Player1 decided its Number: " + firstThreadNumber);
 
             /* ここでjudgeにnumber1にClient1の数字を読み込ませる */
-            judge.setNumber1(tempNumber1);
+            judge.setNumber1(firstThreadNumber);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        latch.countDown();
     }
 
-    private void waitForReplyFromFirstSocket() {
-        try {
-            que1 = bufferedReader1.readLine();
-            latch.countDown();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            latch.await();
-            bufferedWriter1.write("START");
-            bufferedWriter1.newLine();
-            bufferedWriter1.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
   
     /* 2つ目のソケットをconnectする
      * ソケット通信にて必要なものを初期化する
      * ソケットがつながったあとdecideSecondNumber()によって2つ目の
      * Clientが相手に予想させる数字を決める
      */
-    private void connectSecondSocket() {
+    public void connectSecondSocket() {
         try {
             socket2 = serverSocket.accept();
             System.out.println("Connected 2nd Socket!");
@@ -246,60 +325,62 @@ public class Server extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        latch.countDown();;
     }
 
     /* まず最初にSIZEをClient2に送信する
     * Client2はもらったSIZE桁の数字を決めたあと
     * Serverに送信し返すのでそれをnumber2[]に格納する
     */
-    private void decideSecondNumber() {
+    public void decideSecondNumber() {
         try {
-            bufferedWriter2.write(String.valueOf(SIZE));
-            bufferedWriter2.newLine();
-            bufferedWriter2.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-        try {
-            tempNumber2 = bufferedReader2.readLine();
-            System.out.println("Player2 decided its Number: " + tempNumber2);
+            secondThreadNumber = bufferedReader2.readLine();
+            System.out.println("Player2 decided its Number: " + secondThreadNumber);
 
             /* ここでjudgeにnumber2にClient2の数字を読み込ませる */
-            judge.setNumber2(tempNumber2);
+            judge.setNumber2(secondThreadNumber);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        latch.countDown();
     }
     
-    private void waitForReplyFromSecondSocket() {
-        try {
-            que2 = bufferedReader2.readLine();
-            latch.countDown();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void decideNextAction1(String result) {
+        judgeResult1 = judge.startJudge(result, 2);
+        eat1 = String.valueOf(judgeResult1.charAt(0));
+        bite1 = String.valueOf(judgeResult1.charAt(1));
 
-        try {
-            latch.await();
-            bufferedWriter2.write("SECOND");
-            bufferedWriter2.newLine();
-            bufferedWriter2.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (eat1.equals(Integer.toString(SIZE))) {
+            sendToBothSocket("a" + bite1, "b" + bite1);
+            endCondition = CHECKMATE;
+        } else {
+            sendToBothSocket(judgeResult1, "b" + bite1);
         }
     }
-    
-    private void endServerandClient1() {
-        sendToBothSocket("af", "ff");
-    }
 
-    private void endServerandClient2() {
-        sendToBothSocket("ff", "af");
-    }    
+    private void decideNextAction2(String result) {
+        judgeResult2 = judge.startJudge(expectedNumber2, 1);
+        eat2 = String.valueOf(judgeResult2.charAt(0));
+        bite2 = String.valueOf(judgeResult2.charAt(1));
+
+        if (endCondition == NOTCHECKMATE) {
+            if (eat2.equals(Integer.toString(SIZE))) {
+                sendToBothSocket("c" + bite2, "d" + bite2);
+            } else {
+                sendToBothSocket("b" + bite2, judgeResult2);
+            }
+        } else if (endCondition == CHECKMATE) {
+            if (eat2.equals(Integer.toString(SIZE))) {
+                sendToBothSocket("e" + bite2, "e" + bite2);
+            } else {
+                sendToBothSocket("d" + bite2, "c" + bite2);
+            }
+        }
+    }
+       
 
     /* -------------両方のソケットに送信するメソッド------------- */
-    private void sendToBothSocket(String str1, String str2) {
+    public void sendToBothSocket(String str1, String str2) {
         try {
             bufferedWriter1.write(str1);
             bufferedWriter1.newLine();
@@ -316,10 +397,8 @@ public class Server extends Thread {
     
     /* -------------setメソッド------------- */
 
-    /* -------------Debug用メソッド------------- */
-
     /* -------------mainメソッド------------- */
     public static void main(String[] args) {
-        Server server = new Server(0);
+        Server server = new Server();
     }
 }
