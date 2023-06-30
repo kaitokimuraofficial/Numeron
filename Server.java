@@ -5,7 +5,7 @@ import java.util.concurrent.CountDownLatch;
 
 /* Serverクラスでは各プレイヤーがどんな数字を決めたかを保存する
  * Clientクラスからソケット経由で送られてきた予想結果をJudgeクラスにて
- * 判定してその結果とそれに付随する次の動作の命令をClientクラスに戻す
+ * 判定してその結果とそれに付随する次の動作の命令をClientクラスに送る
  */
 public class Server extends Thread {
 
@@ -14,9 +14,9 @@ public class Server extends Thread {
 
     private static String HOST = "127.0.0.1";
     private static int PORT = 1234;
-    private static int SIZE;
+    private static int DIGIT;
 
-    private String nextSize;
+    private String nextDigit;
 
     private static ServerSocket serverSocket;
     
@@ -55,10 +55,10 @@ public class Server extends Thread {
 
     private String eat2;
     private String bite2;
+
     private int endCondition;
 
     private Boolean interrupted;
-
 
     public CountDownLatch latch;
     public CountDownLatch latch2;
@@ -69,7 +69,7 @@ public class Server extends Thread {
     public Server() {
         System.out.println("Connecting...  HOST: " + HOST + " PORT: " + PORT);
         isGameFinished = false;
-        nextSize = "";
+        nextDigit = "";
         try {
             serverSocket = new ServerSocket();
             serverSocket.bind(new InetSocketAddress(HOST, PORT));
@@ -81,16 +81,16 @@ public class Server extends Thread {
 
         /* 1個のスレッドがコネクトされるごとに1つずつlatchが減る */
         latch = new CountDownLatch(2);
-        decideSize();
+        decideDigit();
     }
 
-    /* プロンプト上で入力された数字を桁数(SIZE)として設定する */
-    private void decideSize() {
-        System.out.print("Enter the Number: ");
+    /* プロンプト上で入力された数字を桁数(DIGIT)として設定する */
+    private void decideDigit() {
+        System.out.print("Enter the number of digits : ");
 
         try {
-            SIZE = Integer.parseInt(scanner.nextLine());
-            System.out.println("SIZE is " + SIZE);
+            DIGIT = Integer.parseInt(scanner.nextLine());
+            System.out.println("The number of digits is " + DIGIT);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -115,7 +115,7 @@ public class Server extends Thread {
 
     public void gameStart() {
         judgeInit();
-        sendToBothSocket(Integer.toString(SIZE), Integer.toString(SIZE));
+        sendToBothSocket(Integer.toString(DIGIT), Integer.toString(DIGIT));
 
         /* それぞれの番号を決定する */
         
@@ -177,17 +177,20 @@ public class Server extends Thread {
                 expectedNumber1 = bufferedReader1.readLine();
                 if (interrupted) {
                     break;
-                }
+                } /* client1にてendPanelのendボタンが押された */
                 if (expectedNumber1.equals("end")) {
                     sendToBothSocket("ff", "ff");
                     System.exit(0);
-                } else if (expectedNumber1.equals("repeat")) {
+                } /* client1にてrepeatPanelのrepeatボタンが押された */
+                else if (expectedNumber1.equals("repeat")) {
                     sendToBothSocket("RR", "WW");
-                } else if (expectedNumber1.equals("cancel")) {
-                    sendToBothSocket("RR", "RR");
-                } else if (expectedNumber1.equals("INS")) {
-                    nextSize = bufferedReader1.readLine();
-                    bufferedWriter2.write(nextSize);
+                } /* client1にてrepeatPanelのbackボタンが押された */
+                else if (expectedNumber1.equals("back")) {
+                    sendToBothSocket("KK", "KK");
+                } /* client2にてrepeatPanelのinputNextDigitボタンが押された */
+                else if (expectedNumber1.equals("INS")) {
+                    nextDigit = bufferedReader1.readLine();
+                    bufferedWriter2.write(nextDigit);
                     bufferedWriter2.newLine();
                     bufferedWriter2.flush();
                     try {
@@ -196,16 +199,18 @@ public class Server extends Thread {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                } else if (expectedNumber1.equals("waitEnd")) {
+                } /* client1にてwaitPanelのendボタンが押された */
+                else if (expectedNumber1.equals("waitEnd")) {
                     sendToBothSocket("gg", "gg");
                     isGameFinished = true;
                     System.exit(0);
-                } else if (expectedNumber1.equals("accept")) {
+                } /* client1にてwaitPanelのacceptボタンが押された */
+                else if (expectedNumber1.equals("accept")) {
                     sendToBothSocket("ii", "ii");
-                    sendToBothSocket(nextSize, nextSize);
+                    sendToBothSocket(nextDigit, nextDigit);
                     latch = new CountDownLatch(2);
                     interrupted = true;
-                    SIZE = Integer.valueOf(nextSize);
+                    DIGIT = Integer.valueOf(nextDigit);
                     latch2.countDown();
                     return;
                 } else {
@@ -223,17 +228,20 @@ public class Server extends Thread {
                 expectedNumber2 = bufferedReader2.readLine();
                 if (interrupted) {
                     break;
-                }
+                } /* client2にてendPanelのendボタンが押された */
                 if (expectedNumber2.equals("end")) {
                     sendToBothSocket("ff", "ff");
                     System.exit(0);
-                } else if (expectedNumber2.equals("repeat")) {
+                } /* client2にてrepeatPanelのrepeatボタンが押された */
+                else if (expectedNumber2.equals("repeat")) {
                     sendToBothSocket("WW", "RR");
-                } else if (expectedNumber2.equals("cancel")) {
-                    sendToBothSocket("RR", "RR");
-                } else if (expectedNumber2.equals("INS")) {
-                    nextSize = bufferedReader2.readLine();
-                    bufferedWriter1.write(nextSize);
+                } /* client2にてrepeatPanelのbackボタンが押された */
+                else if (expectedNumber2.equals("back")) {
+                    sendToBothSocket("KK", "KK");
+                } /* client2にてrepeatPanelのinputNextDigitボタンが押された */
+                else if (expectedNumber2.equals("INS")) {
+                    nextDigit = bufferedReader2.readLine();
+                    bufferedWriter1.write(nextDigit);
                     bufferedWriter1.newLine();
                     bufferedWriter1.flush();
                     try {
@@ -242,18 +250,21 @@ public class Server extends Thread {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                } else if (expectedNumber2.equals("waitEnd")) {
+                } /* client2にてwaitPanelのendボタンが押された */
+                else if (expectedNumber2.equals("waitEnd")) {
                     sendToBothSocket("gg", "gg");
                     isGameFinished = true;
                     System.exit(0);
-                } else if (expectedNumber2.equals("accept")) {
+                } /* client2にてwaitPanelのacceptボタンが押された */
+                else if (expectedNumber2.equals("accept")) {
                     sendToBothSocket("ii", "ii");
-                    sendToBothSocket(nextSize, nextSize);
+                    sendToBothSocket(nextDigit, nextDigit);
                     interrupted = true;
-                    SIZE = Integer.valueOf(nextSize);
+                    DIGIT = Integer.valueOf(nextDigit);
                     latch2.countDown();
                     return;
-                } else {
+                } 
+                else {
                     decideNextAction2(expectedNumber2);
                 }
             } catch (Exception e) {
@@ -262,9 +273,9 @@ public class Server extends Thread {
         }
     }
     
-    /* このメソッドでjudgeのSIZEと配列を初期化する */
+    /* このメソッドでjudgeのDIGITと配列を初期化する */
     public void judgeInit() {
-        judge.setSIZE(SIZE);
+        judge.setDigit(DIGIT);
         judge.init();
     }
 
@@ -290,8 +301,8 @@ public class Server extends Thread {
         latch.countDown();
     }
 
-    /* まず最初にSIZEをClient1に送信する
-    * Client1はもらったSIZE桁の数字を決めたあと
+    /* まず最初にDIGITをClient1に送信する
+    * Client1はもらったDIGIT桁の数字を決めたあと
     * Serverに送信し返すのでそれをnumber1[]に格納する
     */
     public void decideFirstNumber() {
@@ -328,8 +339,8 @@ public class Server extends Thread {
         latch.countDown();;
     }
 
-    /* まず最初にSIZEをClient2に送信する
-    * Client2はもらったSIZE桁の数字を決めたあと
+    /* まず最初にDIGITをClient2に送信する
+    * Client2はもらったDIGIT桁の数字を決めたあと
     * Serverに送信し返すのでそれをnumber2[]に格納する
     */
     public void decideSecondNumber() {
@@ -350,7 +361,8 @@ public class Server extends Thread {
         eat1 = String.valueOf(judgeResult1.charAt(0));
         bite1 = String.valueOf(judgeResult1.charAt(1));
 
-        if (eat1.equals(Integer.toString(SIZE))) {
+        if (eat1.equals(Integer.toString(DIGIT))) {
+
             sendToBothSocket("a" + bite1, "b" + bite1);
             endCondition = CHECKMATE;
         } else {
@@ -364,13 +376,13 @@ public class Server extends Thread {
         bite2 = String.valueOf(judgeResult2.charAt(1));
 
         if (endCondition == NOTCHECKMATE) {
-            if (eat2.equals(Integer.toString(SIZE))) {
+            if (eat2.equals(Integer.toString(DIGIT))) {
                 sendToBothSocket("c" + bite2, "d" + bite2);
             } else {
                 sendToBothSocket("b" + bite2, judgeResult2);
             }
         } else if (endCondition == CHECKMATE) {
-            if (eat2.equals(Integer.toString(SIZE))) {
+            if (eat2.equals(Integer.toString(DIGIT))) {
                 sendToBothSocket("e" + bite2, "e" + bite2);
             } else {
                 sendToBothSocket("d" + bite2, "c" + bite2);

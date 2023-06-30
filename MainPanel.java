@@ -1,8 +1,9 @@
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
-public class MainPanel extends JPanel{
-    private JPanel memoPart;
+public class MainPanel extends JPanel {
+    private JScrollPane scrollResult;
     private JPanel inputPart;
     private JPanel resultPart;
     
@@ -14,48 +15,48 @@ public class MainPanel extends JPanel{
 
     private Font f;
     private JTextArea resultArea;
-    
 
     public MainPanel() {
         setLayout(new BorderLayout());
         setSize(500, 450);
-        memoPart = new JPanel();
+        
+        resultArea = new JTextArea();
+        resultArea.setFont(f);
+        resultArea.setText("");
+        resultArea.setEditable(true);
+        resultArea.setLineWrap(true);
+
+        scrollResult = new JScrollPane(resultArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         inputPart = new JPanel();
         resultPart = new JPanel();
 
-        memoPart.setPreferredSize(new Dimension(500, 150));
-        inputPart.setPreferredSize(new Dimension(500, 150));
+        scrollResult.setPreferredSize(new Dimension(500, 100));
+        inputPart.setPreferredSize(new Dimension(500, 200));
         resultPart.setPreferredSize(new Dimension(500, 150));
 
-        memoPart.setBackground(Color.PINK);
         inputPart.setBackground(Color.pink);
         resultPart.setBackground(Color.pink);
 
-        resultArea = new JTextArea(5, 50);
-        resultArea.setFont(f);
-        resultArea.setEditable(false);
-        resultArea.setLineWrap(true);
-        resultArea.setText("");
-
-        mainLabel = new JLabel("");
-
-        memoPart.add(resultArea);
+        LineBorder border = new LineBorder(Color.BLUE, 2, true);
+        scrollResult.setBorder(border);
 
         expectedNumberField = new JTextField();
         expectedNumberField.setPreferredSize(new Dimension(100, 20));
 
         decideExpectNumberButton = new JButton("JUDGE");
+        mainLabel = new JLabel("");
 
-        resultPart.add(mainLabel);
         inputPart.add(expectedNumberField);
         inputPart.add(decideExpectNumberButton);
+        resultPart.add(mainLabel);
 
-        add(memoPart, BorderLayout.NORTH);
+        add(scrollResult, BorderLayout.NORTH);
         add(inputPart, BorderLayout.CENTER);
         add(resultPart, BorderLayout.SOUTH);
     }
 
-
+    
     /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
 
 
@@ -74,15 +75,5 @@ public class MainPanel extends JPanel{
 
     public JTextArea getResultArea() {
         return resultArea;
-    }
-
-    /* -------------setメソッド------------- */
-    public void setMainLabel(String str) {
-        mainLabel.setText(str);
-    }
-    
-    public void setResultArea(String str) {
-        resultArea.setText(str);
-    }
-    
+    }   
 }

@@ -12,25 +12,25 @@ public class Frame extends JFrame {
 
     public JButton ruleButton;                  /* StartPanelでヌメロンのルールを表示するボタン */
     public JButton inputMyNumberButton;         /* StartPanelで自分の数字を入力してServerに数字を送るボタン */
-    public JButton decideExpectNumberButton;    /* MainPanelで予想した相手の数字をServerに送信して判定してもらうためのボタン */
-    public JButton endButton;                   /* EndPanelでclickされるとWindowが閉じる */
-    public JButton repeatButton;                /* EndPanelでclickされると再戦する */
-    public JButton inputNextSizeButton;
-    public JButton cancelButton;
-    public JButton waitEndButton;
-    public JButton acceptButton;
+    public JButton decideExpectedNumberButton;    /* MainPanelで予想した相手の数字をServerに送信して判定してもらうためのボタン */
+    public JButton endButton;                   /* EndPanelでclickするとWindowが閉じる */
+    public JButton repeatButton;                /* EndPanelでclickすると再戦する */
+    public JButton inputNextDigitButton;        /* repeatPanelでclickすると再戦の桁数を相手に送って同意を促す */
+    public JButton backButton;                  /* repeatPanelでclickするendPanelに戻る */
+    public JButton waitEndButton;               /* waitPanelでclickすると終了する */
+    public JButton acceptButton;                /* waitPanelでclickすると再戦の桁数に同意する */
 
     public JLabel titleLabel;
+    public JLabel mainLabel;
     private JLabel endLabel;                    /* EndPanelのYou Win/Loseを表示するJLabel */
     private JLabel repeatLabel;
     public JLabel waitLabel;
     
     private JTextField myNumberField;           /* StartPanelで自分の数字を入力するJTextField */
     private JTextField expectedNumberField;     /* MainPanelで相手の数字だと予想した数字を入力するJTField */
+    private JTextField nextDigit;
 
-    private String myNumber;                    /* StartPanelで自分の数字を入力するJTextFieldの中のString */
     private String expectedNumber;              /* MainPanelで相手の数字だと予想した数字を入力するJTFieldの中のString */
-    private String nextSize;
 
 
     private JTextArea resultArea;               /* MainPanelでEatやBiteの結果をまとめるJTextArea */
@@ -79,16 +79,17 @@ public class Frame extends JFrame {
     private void initializeComponent() {
         ruleButton = startPanel.getRuleButton();
         inputMyNumberButton = startPanel.getinputMyNumberButton();
-        decideExpectNumberButton = mainPanel.getdecideExpectNumberButton();
+        decideExpectedNumberButton = mainPanel.getdecideExpectNumberButton();
         endButton = endPanel.getEndButton();
         repeatButton = endPanel.getRepeatButton();
         waitEndButton = waitPanel.getEndButton();
         acceptButton = waitPanel.getAcceptButton();
         setAcceptButtonEnabaled(false);
-        inputNextSizeButton = repeatPanel.getInputNextSizeButton();
-        cancelButton = repeatPanel.getCancelButton();
+        inputNextDigitButton = repeatPanel.getInputNextDigitButton();
+        backButton = repeatPanel.getBackButton();
 
         titleLabel = startPanel.getTitleLabel();
+        mainLabel = mainPanel.getMainLabel();
         endLabel = endPanel.getEndLabel();
         repeatLabel = repeatPanel.getRepeatLabel();
         waitLabel = waitPanel.getWaitLabel();
@@ -96,10 +97,10 @@ public class Frame extends JFrame {
         myNumberField = startPanel.getMyNumberField();
         expectedNumberField = mainPanel.getExpectedNumberField();
 
-        expectedNumber = expectedNumberField.getText();
+        expectedNumber = getExpectedNumber();
         resultArea = mainPanel.getResultArea();
 
-        nextSize = repeatPanel.getNextSize();
+        nextDigit = repeatPanel.getNextDigit();
     }
 
     /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
@@ -147,11 +148,11 @@ public class Frame extends JFrame {
         panel2.add(mainPanel);
         contentPane.add(panel2);
         if (Turn.equals("START")) {
-            setButtonEnabled(true);
-            mainPanel.setMainLabel("Now is Your Turn. Input some number.");
+            setDecideExpectedButtonEnabled(true);
+            setMainLabel("Now is Your Turn. Input some number.");
         } else {
-            setButtonEnabled(false);
-            mainPanel.setMainLabel("Now is not Your Turn. Wait for Seconds.");
+            setDecideExpectedButtonEnabled(false);
+            setMainLabel("Now is not Your Turn. Wait for Seconds.");
         }
         contentPane.revalidate();
         contentPane.repaint();
@@ -161,7 +162,7 @@ public class Frame extends JFrame {
         finalResult = new String(Result);
         jl.setText("END");
         contentPane.remove(panel2);
-        endLabel.setText("YOU" + Result);
+        setEndLabel("YOU" + Result);
         panel2.removeAll();
         panel2.add(endPanel);
         contentPane.add(panel2);
@@ -174,7 +175,7 @@ public class Frame extends JFrame {
         panel2.revalidate();
         contentPane.remove(panel2);
         panel2.add(endPanel);
-        endLabel.setText("YOU" + finalResult);
+        setEndLabel("YOU" + finalResult);
         contentPane.add(panel2);
         contentPane.revalidate();
         contentPane.repaint();
@@ -207,7 +208,7 @@ public class Frame extends JFrame {
     }
 
 
-    public void executeCancelButton() {
+    public void executeBackButton() {
         changeIntoEndPanel();
     }
 
@@ -215,6 +216,10 @@ public class Frame extends JFrame {
 
     public String getMyNumber() {
         return myNumberField.getText();
+    }
+
+    public JLabel getTitleLabel() {
+        return titleLabel;
     }
 
     public String getExpectedNumber() {
@@ -225,14 +230,30 @@ public class Frame extends JFrame {
         return resultArea;
     }
 
-    public String getNextSize() {
-        return repeatPanel.nextSize.getText();
+    public String getNextDigit() {
+        return nextDigit.getText();
     }
 
     /* -------------setメソッド------------- */
 
     public void setTitleLabel(String str) {
         titleLabel.setText(str);
+    }
+    
+    public void setMainLabel(String str) {
+        mainLabel.setText(str);
+    }
+
+    public void setEndLabel(String str) {
+        endLabel.setText(str);
+    }
+
+    public void setRepeatLabel(String str) {
+        repeatLabel.setText(str);
+    }
+
+    public void setWaitLabel(String str) {
+        waitLabel.setText(str);
     }
 
     public void setMyNumberField(String str) {
@@ -244,27 +265,27 @@ public class Frame extends JFrame {
     }
 
     public void setResultArea(String str) {
-        this.resultArea.setText(str);
+        resultArea.setText(str);
     }
 
     public void appendToResutlArea(String str) {
         resultArea.append(str);
     }
 
-    public void setMainLabel(String str) {
-        mainPanel.setMainLabel(str);
+    public void setRuleButtonEnabled(Boolean bool) {
+        ruleButton.setEnabled(bool);
     }
     
-    public void setButtonEnabled(Boolean bool) {
-        decideExpectNumberButton.setEnabled(bool);
+    public void setDecideExpectedButtonEnabled(Boolean bool) {
+        decideExpectedNumberButton.setEnabled(bool);
     }
 
-    public void setInputNextSizeButtonEnabaled(Boolean bool) {
-        inputNextSizeButton.setEnabled(bool);
+    public void setInputNextDigitButtonEnabaled(Boolean bool) {
+        inputNextDigitButton.setEnabled(bool);
     }
 
-    public void setCancelButtonEnabaled(Boolean bool) {
-        cancelButton.setEnabled(bool);
+    public void setBackButtonEnabaled(Boolean bool) {
+        backButton.setEnabled(bool);
     }
 
     public void setAcceptButtonEnabaled(Boolean bool) {

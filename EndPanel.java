@@ -8,22 +8,32 @@ public class EndPanel extends JPanel {
     private JButton repeatButton;
 
     public EndPanel() {
-        setLayout(new GridLayout(1,3));
+        setLayout(new BorderLayout());
         setSize(500, 450);
+        JPanel labelPart = new JPanel();
+        JPanel buttonPart = new JPanel();
+        labelPart.setPreferredSize(new Dimension(500, 100));
+        buttonPart.setPreferredSize(new Dimension(500, 350));
 
-        endPart = new JPanel();
+        labelPart.setBackground(Color.WHITE);
+        buttonPart.setBackground(Color.PINK);        
 
         endLabel = new JLabel("You ");
-        endButton = new JButton("Close Window");
+        endButton = new JButton("End game");
         repeatButton = new JButton("REPEAT");
         endButton.setPreferredSize(new Dimension(200, 50));
         repeatButton.setPreferredSize(new Dimension(200, 50));
 
-        endPart.add(endLabel);
-        endPart.add(endButton);
-        endPart.add(repeatButton);
-        
-        add(endPart);
+        endLabel.setPreferredSize(new Dimension(500, 100));
+        endLabel.setHorizontalAlignment(JLabel.CENTER);
+        endLabel.setVerticalAlignment(JLabel.CENTER);
+
+        labelPart.add(endLabel);
+        buttonPart.add(endButton);
+        buttonPart.add(repeatButton);
+
+        add(labelPart, BorderLayout.NORTH);
+        add(buttonPart, BorderLayout.CENTER);
     }
 
     /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
@@ -40,10 +50,5 @@ public class EndPanel extends JPanel {
 
     public JButton getRepeatButton() {
         return repeatButton;
-    }
-
-    /* -------------setメソッド------------- */
-    public void setEndLabel(String str) {
-        endLabel.setText(str);
     }
 }

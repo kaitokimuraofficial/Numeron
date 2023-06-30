@@ -24,9 +24,4 @@ public class LoadPanel extends JPanel {
     public JLabel getLoadLabel() {
         return loadLabel;
     }
-
-    /* -------------setメソッド------------- */
-    public void setLoadLabel(String str) {
-        loadLabel.setText(str);
-    }
 }

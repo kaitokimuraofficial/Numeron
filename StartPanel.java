@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -29,7 +30,7 @@ public class StartPanel extends JPanel {
         startPart.setPreferredSize(new Dimension(500, 150));
         titleLabel = new JLabel("");
 
-        titlePart.setBackground(Color.red);
+        titlePart.setBackground(Color.white);
         rulePart.setBackground(Color.pink);
 
         ruleButton = new JButton("RULE");
@@ -38,6 +39,9 @@ public class StartPanel extends JPanel {
         myNumberField = new JTextField();
         myNumberField.setPreferredSize(new Dimension(100, 20));
         
+
+        LineBorder lineBorder = new LineBorder(Color.red, 3, true);
+        titlePart.setBorder(lineBorder);
         titlePart.add(titleLabel);
         rulePart.add(ruleButton);
         startPart.add(myNumberField);
@@ -46,11 +50,11 @@ public class StartPanel extends JPanel {
         add(rulePart, BorderLayout.CENTER);
         add(startPart, BorderLayout.SOUTH);
 
-        setBackground(Color.pink);
+        setBackground(Color.red);
     }
 
     public void executeRulePanel() {
-        rulePanel = new RulePanel();
+        rulePanel = new RulePanel(this);
         rulePanel.setVisible(true);
         requestFocusInWindow();
     }
@@ -74,20 +78,19 @@ public class StartPanel extends JPanel {
     public JTextField getMyNumberField() {
         return myNumberField;
     }
-
-    /* -------------setメソッド------------- */
-    public void setMyNumberField(String str) {
-        myNumberField.setText(str);
-    }
 }
 
 class RulePanel extends JDialog {
     Container cp;
     JTextArea ta;
     Font f;
+    StartPanel startpanel;
+    JButton rulebutton;
     JScrollPane scroll;
 
-    RulePanel() {
+    RulePanel(StartPanel startpanel) {
+        this.startpanel = startpanel;
+        rulebutton = startpanel.getRuleButton();
         setTitle("RULE OF NUMERON");
         cp = getContentPane();
         cp.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -99,11 +102,11 @@ class RulePanel extends JDialog {
         ta.setEditable(false);
         ta.setLineWrap(true);
         ta.setText("それぞれのプレイヤーが、\n");
-        ta.append("0～9 までの数字が書かれたカードのうち3つを使って\n");
-        ta.append("3 桁の番号を作成する0から始めても良い。\n");
-        ta.append("ただし同じ数字を2つ以上使用した番号は作れない。\n");
-        ta.append("先攻のプレイヤーは相手が作成したと番号を予想する");
-        
+        ta.append("0～9 までの数字を使って\n");
+        ta.append("予め決めた桁数の数字を作成する。尚、0から始めても良い。\n");
+        ta.append("また、入力する数字は重複してはいけない。\n");
+        ta.append("先攻のプレイヤーは相手が作成した数字を予想する。\n");
+        ta.append("先に相手の番号を当てたプレイヤーの勝ちとなる。");
         scroll = new JScrollPane(ta);
         cp.add(scroll);
         addWindowListener(new WinEnd());
@@ -111,7 +114,8 @@ class RulePanel extends JDialog {
     
     class WinEnd extends WindowAdapter
 	{
-		public void windowClosing(WindowEvent e) {
+        public void windowClosing(WindowEvent e) {
+            rulebutton.setEnabled(true);
 			setVisible(false);
 		}
 	}

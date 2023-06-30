@@ -1,43 +1,57 @@
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+
 import java.awt.*;
 
 
 public class RepeatPanel extends JPanel {
     private JPanel labelPart;
     private JPanel inputPart;
-    private JPanel cancelPart;
+    private JPanel backPart;
 
     private JLabel repeatLabel;
-    public JTextField nextSize;
-    private JButton inputNextSizeButton;
-    private JButton cancelButton;
+    public JTextField nextDigit;
+    private JButton inputNextDigitButton;
+    private JButton backButton;
 
     public RepeatPanel() {
         setLayout(new BorderLayout());
         setSize(500, 450);
         labelPart = new JPanel();
         inputPart = new JPanel();
-        cancelPart = new JPanel();
-        labelPart.setPreferredSize(new Dimension(500, 150));
-        inputPart.setPreferredSize(new Dimension(500, 150));
-        cancelPart.setPreferredSize(new Dimension(500, 150));
+        backPart = new JPanel();
+        labelPart.setPreferredSize(new Dimension(500, 100));
+        inputPart.setPreferredSize(new Dimension(500, 250));
+        backPart.setPreferredSize(new Dimension(500, 150));
 
         repeatLabel = new JLabel("Enter new digit length");
+        repeatLabel.setFont(new Font("Default", Font.PLAIN, 30));
+        repeatLabel.setPreferredSize(new Dimension(500, 100));
+        repeatLabel.setHorizontalAlignment(JLabel.CENTER);
+        repeatLabel.setVerticalAlignment(JLabel.CENTER);
+        //LineBorder border = new LineBorder(Color.BLUE, 2, true);
+        //repeatLabel.setBorder(border);
+        //repeatLabel.setOpaque(true);
+        //repeatLabel.setBackground(Color.BLUE);
+        //repeatLabel.setForeground(Color.WHITE);
+        labelPart.setBackground(Color.WHITE);
+        inputPart.setBackground(Color.PINK);
+        backPart.setBackground(Color.PINK);
 
-        nextSize = new JTextField();
-        nextSize.setPreferredSize(new Dimension(100, 20));
+        nextDigit = new JTextField();
+        nextDigit.setPreferredSize(new Dimension(100, 20));
 
-        inputNextSizeButton = new JButton("DECIDE NEW LENGTH");
-        cancelButton = new JButton("Back");
+        inputNextDigitButton = new JButton("Decide new digits");
+        backButton = new JButton("Back");
 
         labelPart.add(repeatLabel);
-        inputPart.add(nextSize);
-        inputPart.add(inputNextSizeButton);
-        cancelPart.add(cancelButton);
+        inputPart.add(nextDigit);
+        inputPart.add(inputNextDigitButton);
+        backPart.add(backButton);
 
         add(labelPart, BorderLayout.NORTH);
         add(inputPart, BorderLayout.CENTER);
-        add(cancelPart, BorderLayout.SOUTH);
+        add(backPart, BorderLayout.SOUTH);
     }
 
     /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
@@ -48,21 +62,16 @@ public class RepeatPanel extends JPanel {
         return repeatLabel;
     }
 
-    public String getNextSize() {
-        return nextSize.getText();
+    public JTextField getNextDigit() {
+        return nextDigit;
     }
 
-    public JButton getInputNextSizeButton() {
-        return inputNextSizeButton;
+    public JButton getInputNextDigitButton() {
+        return inputNextDigitButton;
     }
 
-    public JButton getCancelButton() {
-        return cancelButton;
-    }
-
-    /* -------------setメソッド------------- */
-    public void setRepeatLabel(String str) {
-        repeatLabel.setText(str);
+    public JButton getBackButton() {
+        return backButton;
     }
 
 }

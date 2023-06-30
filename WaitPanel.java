@@ -15,10 +15,19 @@ public class WaitPanel extends JPanel {
         setSize(500, 450);
         labelPart = new JPanel();
         buttonPart = new JPanel();
-        labelPart.setPreferredSize(new Dimension(500, 200));
-        buttonPart.setPreferredSize(new Dimension(500, 250));
+        labelPart.setPreferredSize(new Dimension(500, 100));
+        buttonPart.setPreferredSize(new Dimension(500, 350));
+
+        labelPart.setBackground(Color.WHITE);
+        buttonPart.setBackground(Color.PINK);
+
+        
 
         waitLabel = new JLabel("");
+        waitLabel.setFont(new Font("Default", Font.PLAIN, 30));
+        waitLabel.setPreferredSize(new Dimension(500, 100));
+        waitLabel.setHorizontalAlignment(JLabel.CENTER);
+        waitLabel.setVerticalAlignment(JLabel.CENTER);
 
         endButton = new JButton("END");
         acceptButton = new JButton("ACCEPT");
@@ -45,10 +54,5 @@ public class WaitPanel extends JPanel {
 
     public JButton getAcceptButton() {
         return acceptButton;
-    }
-
-    /* -------------setメソッド------------- */
-    public void setWaitLabel(String str) {
-        waitLabel.setText(str);
     }
 }

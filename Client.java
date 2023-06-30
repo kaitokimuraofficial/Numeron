@@ -1,5 +1,6 @@
 import java.net.*;
 import java.io.*;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.CountDownLatch;
@@ -7,7 +8,7 @@ import java.util.concurrent.CountDownLatch;
 public class Client implements ActionListener {
     private static String HOST = "127.0.0.1";
     private static int PORT = 1234;
-    private static int SIZE;
+    private static int DIGIT;
 
     private Socket socket;
     private InputStreamReader inputStreamReader;
@@ -20,7 +21,7 @@ public class Client implements ActionListener {
     private Frame frame;
 
     private String myNumber;
-    private String inputNextSize;
+    private String inputNextDigit;
     
     private Boolean endCondition;
     private String expectNumber;
@@ -29,11 +30,15 @@ public class Client implements ActionListener {
     private String eat;
     private String bite;
 
+    private String status;
+
     private String initialOrder;
+
+    private String nextDigitString;
     
     /* Serverとソケット通信をつなぐ
      * つないだあとFrameクラスのframeを初期化
-     * receiveSizeで自分の数字の桁数を決める
+     * receiveDigitで自分の数字の桁数を決める
      */
     public Client() {
         try {
@@ -46,12 +51,12 @@ public class Client implements ActionListener {
             e.printStackTrace();
         }
         initialOrder = "INITIALSTATE";
-        receiveSize();
+        receiveDigit();
     }
     
-    public void receiveSize() {
+    public void receiveDigit() {
         try {
-            SIZE = Integer.parseInt(bufferedReader.readLine());
+            DIGIT = Integer.parseInt(bufferedReader.readLine());
             frame = new Frame();
             addSthToActionListener();
         } catch (Exception e) {
@@ -67,19 +72,19 @@ public class Client implements ActionListener {
     */
     public void decideAndSendMyNumber() {
         while (true) {
+            frame.setInputNextDigitButtonEnabaled(true);
             latch = new CountDownLatch(1);
-            System.out.println(latch);
             try {
                 latch.await();
                 sendSthToServer(myNumber);
-                System.out.println(myNumber);
+                frame.setMyNumberField("");
+                frame.setTitleLabel("");
                 frame.changeIntoLoadPanel();
             } catch (Exception e) {
                 e.printStackTrace();
             }
             try {
                 initialOrder = bufferedReader.readLine();
-                System.out.println(initialOrder);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -88,28 +93,36 @@ public class Client implements ActionListener {
     }
 
     public void gameStart(String initialOrder) {
-        System.out.println(initialOrder);
         frame.changeIntoMainPanel(initialOrder);
 
         endCondition = false;
         while (!endCondition) {
-            System.out.println("gameStart");
             try {
                 judgeResult = bufferedReader.readLine();
                 eat = Character.toString(judgeResult.charAt(0));
                 bite = Character.toString(judgeResult.charAt(1));
-                System.out.println(judgeResult);
                 if (eat.equals("a")) {
-                    frame.setButtonEnabled(false);
+                     frame.appendToResutlArea(expectNumber + " :: EAT : " + DIGIT + "  BITE : "
+                            + 0 + "\n");
+                    frame.setDecideExpectedButtonEnabled(false);
                     frame.setMainLabel("You made a prediction! If client2 makes a prediction, DRAW, if not, WIN!");
                 } else if (eat.equals("b")) {
-                    frame.setButtonEnabled(true);
+                    frame.setDecideExpectedButtonEnabled(true);
                     frame.setMainLabel("Now is Your Turn. Input some number.");
                 } else if (eat.equals("c")) {
+                    frame.setResultArea("");
+                    frame.setExpectedNumberField("");
+                    status = "LOSE";
                     frame.changeIntoEndPanel("LOSE");
                 } else if (eat.equals("d")) {
+                    frame.setResultArea("");
+                    frame.setExpectedNumberField("");
+                    status = "WIN";
                     frame.changeIntoEndPanel("WIN");
                 } else if (eat.equals("e")) {
+                    frame.setResultArea("");
+                    frame.setExpectedNumberField("");
+                    status = "DRAW";
                     frame.changeIntoEndPanel("DRAW");
                 } else if (eat.equals("f")) {
                     endCondition = true;
@@ -119,26 +132,30 @@ public class Client implements ActionListener {
                     endCondition = true;
                     frame.executeEndButton();
                 } else if (eat.equals("i")) {
-                    SIZE = Integer.valueOf(bufferedReader.readLine());
+                    DIGIT = Integer.valueOf(bufferedReader.readLine());
                     endCondition = true;
+                    status = "";
                     frame.changeIntoStartPanel();
                     return;
                 } else if (eat.equals("W")) {
                     frame.changeIntoWaitPanel();
-                    inputNextSize = bufferedReader.readLine();
-                    if (inputNextSize.equals("R")) {
-                        frame.changeIntoRepeatPanel();
+                    inputNextDigit = bufferedReader.readLine();
+                    if (inputNextDigit.equals("KK")) {
+                        frame.changeIntoEndPanel(status);
                         continue;
                     } else {
-                        frame.waitLabel.setText("IS " + inputNextSize + " OK?");
+                        frame.setWaitLabel("IS " + inputNextDigit + " OK?");
                         frame.setAcceptButtonEnabaled(true);
                     }
                 } else if (eat.equals("R")) {
                     frame.changeIntoRepeatPanel();
+                } else if (eat.equals("K")) {
+                    frame.changeIntoEndPanel(status);
                 } else {
-                    frame.appendToResutlArea(judgeResult + " :: EAT : " + judgeResult.charAt(0) + "  BITE : "
+                    frame.appendToResutlArea(expectNumber + " :: EAT : " + judgeResult.charAt(0) + "  BITE : "
                             + judgeResult.charAt(1) + "\n");
-                    frame.setButtonEnabled(false);
+                    frame.setExpectedNumberField("");
+                    frame.setDecideExpectedButtonEnabled(false);
                     frame.setMainLabel("Now is not Your Turn. Wait for Seconds.");
                 }
             } catch (Exception e) {
@@ -163,19 +180,40 @@ public class Client implements ActionListener {
         frame.ruleButton.addActionListener(this);
         frame.inputMyNumberButton.addActionListener(this);
         
-        frame.decideExpectNumberButton.addActionListener(this);
+        frame.decideExpectedNumberButton.addActionListener(this);
         
         frame.endButton.addActionListener(this);
         frame.repeatButton.addActionListener(this);
         
-        frame.cancelButton.addActionListener(this);
-        frame.inputNextSizeButton.addActionListener(this);
+        frame.backButton.addActionListener(this);
+        frame.inputNextDigitButton.addActionListener(this);
         
         frame.waitEndButton.addActionListener(this);
         frame.acceptButton.addActionListener(this);
     }
 
-    public int noOverlap(String str) {
+    public int isvalid(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            char currentChar = str.charAt(i);
+            if (!Character.isDigit(currentChar)) {
+                return 1;
+            }
+        }
+
+        if (str.length() != DIGIT) {
+            return 2;
+        }
+
+        for (int i = 0; i < DIGIT; i++) {
+            char currentChar = str.charAt(i);
+            if (str.indexOf(currentChar, i + 1) != -1) {
+                return 3;
+            }
+        }
+        return 0;
+    }
+    
+    public int isvalid2(String str) {
         for (int i = 0; i < str.length(); i++) {
             char currentChar = str.charAt(i);
             if (!Character.isDigit(currentChar)) {
@@ -183,15 +221,8 @@ public class Client implements ActionListener {
             }
         }
         
-        if (str.length() != SIZE) {
+        if (str.length() != 1) {
             return 2;
-        }
-
-        for (int i = 0; i < SIZE; i++) {
-            char currentChar = str.charAt(i);
-            if (str.indexOf(currentChar, i + 1) != -1) {
-                return 3;
-            }
         }
         return 0;
     }
@@ -206,10 +237,13 @@ public class Client implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == frame.ruleButton) {
+            frame.setRuleButtonEnabled(false);
             frame.executeRuleButton();
         } else if (e.getSource() == frame.inputMyNumberButton) {
             myNumber = frame.getMyNumber();
-            switch (noOverlap(myNumber)) {
+            Font font = frame.getTitleLabel().getFont();
+            frame.getTitleLabel().setFont(font.deriveFont(25f));
+            switch (isvalid(myNumber)) {
                 case 0:
                     latch.countDown();
                     break;
@@ -217,27 +251,50 @@ public class Client implements ActionListener {
                     frame.setTitleLabel("数字以外は入力できません");
                     break;
                 case 2:
-                    frame.setTitleLabel("入力した数字は桁数が不正です。" + Integer.toString(SIZE) + "桁入力してください");
+                    frame.setTitleLabel(Integer.toString(DIGIT) + "桁入力してください");
                     break;
                 case 3:
                     frame.setTitleLabel("数字を重複して使うことはできません");
                     break;
             }
-        } else if (e.getSource() == frame.decideExpectNumberButton) {
+        } else if (e.getSource() == frame.decideExpectedNumberButton) {
             expectNumber = frame.getExpectedNumber();
-            sendSthToServer(expectNumber);
+            switch (isvalid(expectNumber)) {
+                case 0:
+                    sendSthToServer(expectNumber);
+                    break;
+                    case 1:
+                    frame.setMainLabel("数字以外は入力できません");
+                    break;
+                case 2:
+                    frame.setMainLabel(Integer.toString(DIGIT) + "桁入力してください");
+                    break;
+                case 3:
+                    frame.setMainLabel("数字を重複して使うことはできません");
+                    break;
+            }
         } else if (e.getSource() == frame.endButton) {
             sendSthToServer("end");
         } else if (e.getSource() == frame.repeatButton) {
             sendSthToServer("repeat");
-        } else if (e.getSource() == frame.cancelButton) {
-            sendSthToServer("cancel");
-        } else if (e.getSource() == frame.inputNextSizeButton) {
+        } else if (e.getSource() == frame.backButton) {
+            sendSthToServer("back");
+        } else if (e.getSource() == frame.inputNextDigitButton) {
             sendSthToServer("INS");
-            sendSthToServer(frame.getNextSize());
-            System.out.println(frame.getNextSize());
-            frame.setCancelButtonEnabaled(false);
-            frame.setInputNextSizeButtonEnabaled(false);
+            nextDigitString = frame.getNextDigit();
+            switch (isvalid2(nextDigitString)) {
+                case 0:
+                    sendSthToServer(nextDigitString);
+                    frame.setBackButtonEnabaled(false);
+                    frame.setInputNextDigitButtonEnabaled(false);
+                    break;
+                case 1:
+                    frame.setRepeatLabel("数字以外は入力できません");
+                    break;
+                case 2:
+                    frame.setRepeatLabel("1桁だけ入力してください");
+                    break;
+            }
         } else if (e.getSource() == frame.waitEndButton) {
             sendSthToServer("waitEnd");
         } else if (e.getSource() == frame.acceptButton) {
