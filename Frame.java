@@ -276,6 +276,10 @@ public class Frame extends JFrame {
         decideExpectedNumberButton.setEnabled(bool);
     }
 
+    public void setNextDigit(String str) {
+        nextDigit.setText(str);
+    }
+
     public void setInputNextDigitButtonEnabaled(Boolean bool) {
         inputNextDigitButton.setEnabled(bool);
     }

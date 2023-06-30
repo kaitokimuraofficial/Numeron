@@ -111,16 +111,22 @@ public class Client implements ActionListener {
                     frame.setMainLabel("Now is Your Turn. Input some number.");
                 } else if (eat.equals("c")) {
                     frame.setResultArea("");
+                    frame.setWaitLabel("");
+                    frame.setNextDigit("");
                     frame.setExpectedNumberField("");
                     status = "LOSE";
                     frame.changeIntoEndPanel("LOSE");
                 } else if (eat.equals("d")) {
                     frame.setResultArea("");
+                    frame.setWaitLabel("");
+                    frame.setNextDigit("");
                     frame.setExpectedNumberField("");
                     status = "WIN";
                     frame.changeIntoEndPanel("WIN");
                 } else if (eat.equals("e")) {
                     frame.setResultArea("");
+                    frame.setWaitLabel("");
+                    frame.setNextDigit("");
                     frame.setExpectedNumberField("");
                     status = "DRAW";
                     frame.changeIntoEndPanel("DRAW");
@@ -265,7 +271,7 @@ public class Client implements ActionListener {
                 case 0:
                     sendSthToServer(expectedNumber);
                     break;
-                    case 1:
+                case 1:
                     frame.setMainLabel("数字以外は入力できません");
                     break;
                 case 2:
@@ -282,10 +288,10 @@ public class Client implements ActionListener {
         } else if (e.getSource() == frame.backButton) {
             sendSthToServer("back");
         } else if (e.getSource() == frame.inputNextDigitButton) {
-            sendSthToServer("INS");
             nextDigitString = frame.getNextDigit();
             switch (isvalid2(nextDigitString)) {
                 case 0:
+                    sendSthToServer("INS");
                     sendSthToServer(nextDigitString);
                     frame.setBackButtonEnabaled(false);
                     frame.setInputNextDigitButtonEnabaled(false);
