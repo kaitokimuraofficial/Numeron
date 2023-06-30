@@ -116,7 +116,7 @@ public class Server extends Thread {
     public void gameStart() {
         judgeInit();
         sendToBothSocket(Integer.toString(DIGIT), Integer.toString(DIGIT));
-
+        
         /* それぞれの番号を決定する */
         
         while (!isGameFinished) {
@@ -211,6 +211,7 @@ public class Server extends Thread {
                     latch = new CountDownLatch(2);
                     interrupted = true;
                     DIGIT = Integer.valueOf(nextDigit);
+                    judgeInit();
                     latch2.countDown();
                     return;
                 } else {
@@ -262,6 +263,7 @@ public class Server extends Thread {
                     latch = new CountDownLatch(2);
                     interrupted = true;
                     DIGIT = Integer.valueOf(nextDigit);
+                    judgeInit();
                     latch2.countDown();
                     return;
                 } 
@@ -277,7 +279,7 @@ public class Server extends Thread {
     /* このメソッドでjudgeのDIGITと配列を初期化する */
     public void judgeInit() {
         judge.setDigit(DIGIT);
-        judge.init();
+        judge.init(DIGIT);
     }
 
     

@@ -201,6 +201,7 @@ public class Frame extends JFrame {
 
     public void executeEndButton() {
         dispose();
+        System.exit(0);
     }
 
 

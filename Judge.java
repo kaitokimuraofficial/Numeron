@@ -21,11 +21,11 @@ public class Judge {
 
     /* ^^^^^^^^^^^^各種メソッドまとめ^^^^^^^^^^^^ */
 
-    public void init() {
-        number1 = new int[DIGIT];
-        number2 = new int[DIGIT];
-        result1 = new char[DIGIT];
-        result2 = new char[DIGIT];
+    public void init(int digit) {
+        number1 = new int[digit];
+        number2 = new int[digit];
+        result1 = new char[digit];
+        result2 = new char[digit];
     }
     
 
@@ -108,8 +108,8 @@ public class Judge {
 
     /* ^^^^^^^^^^^^setメソッド^^^^^^^^^^^^ */
 
-    public void setDigit(int DIGIT) {
-        this.DIGIT = DIGIT;
+    public void setDigit(int digit) {
+        DIGIT = digit;
     }
 
     public void setNumber1(String tempNumber1) {
