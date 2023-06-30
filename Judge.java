@@ -44,7 +44,7 @@ public class Judge {
     public String calculateAll(String inputNumber, int[] targetNumber) {
         String answer;
         eatInAnswer = Integer.toString(calculateEat(inputNumber, targetNumber));
-        biteInAnswer = Integer.toString(calculateBite(inputNumber, targetNumber));
+        biteInAnswer = Integer.toString(calculateBite(inputNumber, targetNumber)-calculateEat(inputNumber, targetNumber));
 
         answer = eatInAnswer + biteInAnswer;
 
@@ -84,13 +84,10 @@ public class Judge {
         }
 
         for (int i = 0; i < DIGIT; i++) {
-            for (int j = i; j < DIGIT; j++) {
-                if (expectedNumber[i] == correctNumber[j] && i == j) {
-                    break;
-                }
+            for (int j = 0; j < DIGIT; j++) {
                 if (expectedNumber[i] == correctNumber[j]) {
                     bite += 1;
-                    break;
+                    continue;
                 }
             }
         }
