@@ -137,6 +137,7 @@ public class Client implements ActionListener {
                 } else if (eat.equals("g")) {
                     endCondition = true;
                     frame.executeEndButton();
+                    System.exit(0);
                 } else if (eat.equals("i")) {
                     DIGIT = Integer.valueOf(bufferedReader.readLine());
                     endCondition = false;
@@ -305,6 +306,7 @@ public class Client implements ActionListener {
             }
         } else if (e.getSource() == frame.waitEndButton) {
             sendSthToServer("waitEnd");
+            System.exit(0);
         } else if (e.getSource() == frame.acceptButton) {
             sendSthToServer("accept");
         } 
