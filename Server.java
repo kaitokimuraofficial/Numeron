@@ -259,6 +259,7 @@ public class Server extends Thread {
                 else if (expectedNumber2.equals("accept")) {
                     sendToBothSocket("ii", "ii");
                     sendToBothSocket(nextDigit, nextDigit);
+                    latch = new CountDownLatch(2);
                     interrupted = true;
                     DIGIT = Integer.valueOf(nextDigit);
                     latch2.countDown();
@@ -367,6 +368,7 @@ public class Server extends Thread {
             endCondition = CHECKMATE;
         } else {
             sendToBothSocket(judgeResult1, "b" + bite1);
+            endCondition = NOTCHECKMATE;
         }
     }
 
@@ -386,6 +388,7 @@ public class Server extends Thread {
                 sendToBothSocket("e" + bite2, "e" + bite2);
             } else {
                 sendToBothSocket("d" + bite2, "c" + bite2);
+
             }
         }
     }

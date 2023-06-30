@@ -133,7 +133,9 @@ public class Client implements ActionListener {
                     frame.executeEndButton();
                 } else if (eat.equals("i")) {
                     DIGIT = Integer.valueOf(bufferedReader.readLine());
-                    endCondition = true;
+                    endCondition = false;
+                    frame.setBackButtonEnabaled(true);
+                    frame.setRepeatLabel("");
                     status = "";
                     frame.changeIntoStartPanel();
                     return;
