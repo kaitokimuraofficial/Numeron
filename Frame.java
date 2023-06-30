@@ -30,9 +30,6 @@ public class Frame extends JFrame {
     private JTextField expectedNumberField;     /* MainPanelで相手の数字だと予想した数字を入力するJTField */
     private JTextField nextDigit;
 
-    private String expectedNumber;              /* MainPanelで相手の数字だと予想した数字を入力するJTFieldの中のString */
-
-
     private JTextArea resultArea;               /* MainPanelでEatやBiteの結果をまとめるJTextArea */
 
 
@@ -97,7 +94,6 @@ public class Frame extends JFrame {
         myNumberField = startPanel.getMyNumberField();
         expectedNumberField = mainPanel.getExpectedNumberField();
 
-        expectedNumber = getExpectedNumber();
         resultArea = mainPanel.getResultArea();
 
         nextDigit = repeatPanel.getNextDigit();

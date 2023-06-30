@@ -405,9 +405,6 @@ public class Server extends Thread {
         }
     }
 
-    /* -------------getメソッド------------- */
-    
-    /* -------------setメソッド------------- */
 
     /* -------------mainメソッド------------- */
     public static void main(String[] args) {

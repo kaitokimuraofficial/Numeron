@@ -1,8 +1,5 @@
 import javax.swing.*;
-import javax.swing.border.LineBorder;
-
 import java.awt.*;
-
 
 public class RepeatPanel extends JPanel {
     private JPanel labelPart;
@@ -29,11 +26,7 @@ public class RepeatPanel extends JPanel {
         repeatLabel.setPreferredSize(new Dimension(500, 100));
         repeatLabel.setHorizontalAlignment(JLabel.CENTER);
         repeatLabel.setVerticalAlignment(JLabel.CENTER);
-        //LineBorder border = new LineBorder(Color.BLUE, 2, true);
-        //repeatLabel.setBorder(border);
-        //repeatLabel.setOpaque(true);
-        //repeatLabel.setBackground(Color.BLUE);
-        //repeatLabel.setForeground(Color.WHITE);
+
         labelPart.setBackground(Color.WHITE);
         inputPart.setBackground(Color.PINK);
         backPart.setBackground(Color.PINK);

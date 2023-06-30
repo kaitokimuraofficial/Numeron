@@ -24,7 +24,7 @@ public class Client implements ActionListener {
     private String inputNextDigit;
     
     private Boolean endCondition;
-    private String expectNumber;
+    private String expectedNumber;
     private String judgeResult;
 
     private String eat;
@@ -102,7 +102,7 @@ public class Client implements ActionListener {
                 eat = Character.toString(judgeResult.charAt(0));
                 bite = Character.toString(judgeResult.charAt(1));
                 if (eat.equals("a")) {
-                     frame.appendToResutlArea(expectNumber + " :: EAT : " + DIGIT + "  BITE : "
+                     frame.appendToResutlArea(expectedNumber + " :: EAT : " + DIGIT + "  BITE : "
                             + 0 + "\n");
                     frame.setDecideExpectedButtonEnabled(false);
                     frame.setMainLabel("You made a prediction! If client2 makes a prediction, DRAW, if not, WIN!");
@@ -152,8 +152,8 @@ public class Client implements ActionListener {
                 } else if (eat.equals("K")) {
                     frame.changeIntoEndPanel(status);
                 } else {
-                    frame.appendToResutlArea(expectNumber + " :: EAT : " + judgeResult.charAt(0) + "  BITE : "
-                            + judgeResult.charAt(1) + "\n");
+                    frame.appendToResutlArea(expectedNumber + "   :: EAT : " + eat + "  BITE : "
+                            + bite + "\n");
                     frame.setExpectedNumberField("");
                     frame.setDecideExpectedButtonEnabled(false);
                     frame.setMainLabel("Now is not Your Turn. Wait for Seconds.");
@@ -258,10 +258,10 @@ public class Client implements ActionListener {
                     break;
             }
         } else if (e.getSource() == frame.decideExpectedNumberButton) {
-            expectNumber = frame.getExpectedNumber();
-            switch (isvalid(expectNumber)) {
+            expectedNumber = frame.getExpectedNumber();
+            switch (isvalid(expectedNumber)) {
                 case 0:
-                    sendSthToServer(expectNumber);
+                    sendSthToServer(expectedNumber);
                     break;
                     case 1:
                     frame.setMainLabel("数字以外は入力できません");

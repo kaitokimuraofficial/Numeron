@@ -2,7 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class EndPanel extends JPanel {
-    private JPanel endPart;
+    private JPanel labelPart;
+    private JPanel buttonPart;
     private JLabel endLabel;
     private JButton endButton;
     private JButton repeatButton;
@@ -10,8 +11,8 @@ public class EndPanel extends JPanel {
     public EndPanel() {
         setLayout(new BorderLayout());
         setSize(500, 450);
-        JPanel labelPart = new JPanel();
-        JPanel buttonPart = new JPanel();
+        labelPart = new JPanel();
+        buttonPart = new JPanel();
         labelPart.setPreferredSize(new Dimension(500, 100));
         buttonPart.setPreferredSize(new Dimension(500, 350));
 
